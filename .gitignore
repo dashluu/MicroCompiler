@@ -1,0 +1,6 @@
+*.class
+*.iml
+
+# Builds
+.idea/
+cmake-build-debug/
