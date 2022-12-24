@@ -2,10 +2,11 @@ package Utilities;
 
 public class Token {
     public enum TokenType {
-        UNKNOWN, KEYWORD, ID, NUM, BINARY, LPAREN, RPAREN, COLON, SEMICOLON, DOT, ASSIGNMENT
+        UNKNOWN, ID_DECL, INT_TYPE, FLOAT_TYPE, ID, NUM, BINARY_UNARY,
+        BINARY, UNARY, LPAREN, RPAREN, COLON, SEMICOLON, DOT, ASSIGNMENT
     }
 
-    private String value;
+    private final String value;
     private TokenType tokenType;
 
     public Token(String value, TokenType tokenType) {
@@ -13,12 +14,12 @@ public class Token {
         this.tokenType = tokenType;
     }
 
-    public String getValue() {
-        return value;
+    public Token(String value) {
+        this(value, TokenType.UNKNOWN);
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public String getValue() {
+        return value;
     }
 
     public TokenType getType() {

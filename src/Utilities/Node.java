@@ -25,8 +25,23 @@ public class Node {
         children.add(child);
     }
 
+    public int getNumChildren() {
+        return children.size();
+    }
+
     @Override
     public String toString() {
         return token.toString();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Node node)) {
+            return false;
+        }
+        return token.equals(node.token);
     }
 }
