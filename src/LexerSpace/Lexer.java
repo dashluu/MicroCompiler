@@ -1,7 +1,7 @@
 package LexerSpace;
 
 import Exceptions.SyntaxError;
-import Operators.OperatorTable;
+import Symbols.SymbolInfo;
 import Symbols.SymbolTable;
 import Utilities.Token;
 
@@ -46,6 +46,11 @@ public class Lexer {
         this.buffer = new Buffer(reader);
     }
 
+    /**
+     * Get the current line in the stream.
+     *
+     * @return the current line in the stream.
+     */
     public int getCurrLine() {
         return buffer.currLine;
     }
@@ -54,6 +59,11 @@ public class Lexer {
         buffer.putBack(str);
     }
 
+    /**
+     * Skips the spaces until a non-space character is encountered.
+     *
+     * @throws IOException if the read operation causes an IO error.
+     */
     private void skipSpaces() throws IOException {
         short c;
         while ((c = buffer.peek()) != EOS && isSpace(c)) {
@@ -61,22 +71,53 @@ public class Lexer {
         }
     }
 
+    /**
+     * Determines if the character is a space.
+     *
+     * @param c the character to be checked.
+     * @return true if the character is a space and false otherwise.
+     */
     private boolean isSpace(short c) {
         return Character.isWhitespace(c);
     }
 
+    /**
+     * Determines if the character is an alphanumeric or an underscore.
+     *
+     * @param c the character to be checked.
+     * @return true if the character is an alphanumeric or an underscore and false otherwise.
+     */
     private boolean isAlnumUnderscore(short c) {
         return Character.isAlphabetic(c) || Character.isDigit(c) || c == '_';
     }
 
+    /**
+     * Determines if the character is a valid special character.
+     *
+     * @param c the character to be checked.
+     * @return true if the character is a valid special character and false otherwise.
+     */
     private boolean isSpecialChar(short c) {
         return SPECIAL_CHARS.indexOf(c) >= 0;
     }
 
+    /**
+     * Determines if the character is a valid separator.
+     *
+     * @param c the character to be checked.
+     * @return true if the character is a valid separator and false otherwise.
+     */
     private boolean isSeparator(short c) {
         return c == EOS || isSpace(c) || c == ';';
     }
 
+    /**
+     * Gets the next token in the stream.
+     *
+     * @return a token if one exists and null otherwise.
+     * @throws SyntaxError if there is a syntax error.
+     * @throws IOException if the read operation causes an IO error.
+     */
     public Token getNextToken() throws SyntaxError, IOException {
         skipSpaces();
 
@@ -87,10 +128,20 @@ public class Lexer {
         Token token = getAlnumUnderscoreToken();
         if (token != null) {
             // Check if the token is a keyword, if it is, change its token type
-            // Otherwise, keep it as an ID
-            if (SymbolTable.getInstance().isKeyword(token.getValue())) {
-                token.setType(Token.TokenType.KEYWORD);
+            String tokenStr = token.getValue();
+            SymbolTable symbolTable = SymbolTable.getInstance();
+            SymbolInfo info = symbolTable.getKeyword(tokenStr);
+            if (info != null) {
+                token.setType(info.getToken().getType());
+                return token;
             }
+            // Check if the token is a type id, if it is, change its token type
+            info = symbolTable.getType(tokenStr);
+            if (info != null) {
+                token.setType(info.getToken().getType());
+                return token;
+            }
+            // Otherwise, keep it as an ID
             return token;
         }
         token = getScientificNumberToken();
@@ -99,9 +150,15 @@ public class Lexer {
         }
         token = getOperatorToken();
         if (token != null) {
+            // Get the correct operator type using the symbol table
+            SymbolInfo info = SymbolTable.getInstance().getOperator(token.getValue());
+            if (info != null) {
+                token.setType(info.getToken().getType());
+                return token;
+            }
             return token;
         }
-        throw new SyntaxError("Invalid expression", getCurrLine());
+        throw new SyntaxError("Invalid syntax", getCurrLine());
     }
 
     /**
@@ -190,7 +247,7 @@ public class Lexer {
         while ((c = buffer.peek()) != EOS && !end) {
             tempStr = tokenStr.toString() + (char) c;
             // Find the operator corresponding to the string
-            end = !OperatorTable.getInstance().contain(tempStr);
+            end = !SymbolTable.getInstance().isOperator(tempStr);
             if (!end) {
                 tokenStr.append((char) c);
                 buffer.read();
@@ -238,25 +295,6 @@ public class Lexer {
         StringBuilder tokenStr = new StringBuilder();
         StringBuilder tempStr = new StringBuilder();
 
-        // Reads '+'
-        Token plusMinusToken = getStrToken("+", tempStr, Token.TokenType.UNKNOWN);
-        boolean missingPlusMinus = plusMinusToken == null;
-        if (missingPlusMinus) {
-            // Put back what has been read
-            buffer.putBack(tempStr.toString());
-            // Reads '-' if '+' is not present
-            plusMinusToken = getStrToken("-", tempStr, Token.TokenType.UNKNOWN);
-            missingPlusMinus = plusMinusToken == null;
-            if (!missingPlusMinus) {
-                tokenStr.append(plusMinusToken.getValue());
-            } else {
-                // Put back what has been read
-                buffer.putBack(tempStr.toString());
-            }
-        } else {
-            tokenStr.append(plusMinusToken.getValue());
-        }
-
         // Reads the integer part
         Token intToken = getDigitSeqToken();
         boolean missingInt = intToken == null;
@@ -277,9 +315,6 @@ public class Lexer {
         }
 
         if (missingInt && missingDecPoint) {
-            if (!missingPlusMinus) {
-                buffer.putBack(plusMinusToken.getValue());
-            }
             return null;
         }
 
@@ -329,6 +364,24 @@ public class Lexer {
             }
         }
         tokenStr.append("e");
+
+        // Get +/-
+        tempToken = getStrToken("+", tempStr, Token.TokenType.UNKNOWN);
+        if (tempToken == null) {
+            // Put back what has been read
+            buffer.putBack(tempStr.toString());
+            // Reads '-' if '+' is not present
+            tempToken = getStrToken("-", tempStr, Token.TokenType.UNKNOWN);
+            if (tempToken == null) {
+                // Put back what has been read
+                buffer.putBack(tempStr.toString());
+            } else {
+                tokenStr.append(tempToken.getValue());
+            }
+        } else {
+            tokenStr.append(tempToken.getValue());
+        }
+
         // Get the power
         tempToken = getNumberToken();
         if (tempToken == null) {
