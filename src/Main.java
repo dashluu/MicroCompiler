@@ -1,5 +1,9 @@
 import Exceptions.SyntaxError;
 import LexerSpace.Lexer;
+import ParserSpace.ExpressionParser;
+import Symbols.IDInfo;
+import Symbols.SymbolTable;
+import Utilities.Global;
 import Utilities.Token;
 
 import java.io.BufferedReader;
@@ -8,13 +12,11 @@ import java.io.StringReader;
 
 public class Main {
     public static void main(String[] args) throws SyntaxError, IOException {
-        String str = "var a: int =(-125 + .1    /    .e+1   )   ;";
+        String str = "    a+a  *(-2.e-1+--(75))\t";
         BufferedReader reader = new BufferedReader(new StringReader(str));
         Lexer lexer = new Lexer(reader);
-        Token token;
-
-        while ((token = lexer.getNextToken()) != null) {
-            System.out.println(token);
-        }
+        ExpressionParser expressionParser = new ExpressionParser(lexer);
+        SymbolTable.getInstance().insert(new IDInfo(new Token("a", Token.TokenType.ID), Global.globalScope));
+        expressionParser.parseExpression(Global.globalScope);
     }
 }
