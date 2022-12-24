@@ -1,12 +1,12 @@
 package Symbols;
 
-import Utilities.BaseTable;
 import Utilities.Block;
 import Utilities.Global;
+import Utilities.Token;
 
 import java.util.HashMap;
 
-public class SymbolTable implements BaseTable<SymbolInfo, SymbolInfo> {
+public class SymbolTable {
     private final HashMap<SymbolInfo, SymbolInfo> symbols = new HashMap<>();
     private static SymbolTable symbolTable;
     private static boolean init = false;
@@ -17,66 +17,120 @@ public class SymbolTable implements BaseTable<SymbolInfo, SymbolInfo> {
     public static SymbolTable getInstance() {
         if (!init) {
             symbolTable = new SymbolTable();
-            symbolTable.insert(new KeywordInfo(Global.ID_DECL, KeywordInfo.KeywordType.ID_DECL));
-            symbolTable.insert(new KeywordInfo(Global.INT_TYPE_ID, KeywordInfo.KeywordType.TYPE));
+            symbolTable.insert(new KeywordInfo(new Token(Global.ID_DECL, Token.TokenType.ID_DECL)));
+            symbolTable.insert(new TypeInfo(new Token(Global.INT_TYPE_ID, Token.TokenType.INT_TYPE)));
+            symbolTable.insert(new TypeInfo(new Token(Global.FLOAT_TYPE_ID, Token.TokenType.FLOAT_TYPE)));
+            symbolTable.insert(new OperatorInfo(new Token("+", Token.TokenType.BINARY_UNARY), 0, true));
+            symbolTable.insert(new OperatorInfo(new Token("-", Token.TokenType.BINARY_UNARY), 0, true));
+            symbolTable.insert(new OperatorInfo(new Token("*", Token.TokenType.BINARY), 0, true));
+            symbolTable.insert(new OperatorInfo(new Token("/", Token.TokenType.BINARY), 0, true));
+            symbolTable.insert(new OperatorInfo(new Token(".", Token.TokenType.DOT), 0, true));
+            symbolTable.insert(new OperatorInfo(new Token(":", Token.TokenType.COLON), 0, true));
+            symbolTable.insert(new OperatorInfo(new Token("(", Token.TokenType.LPAREN), 0, true));
+            symbolTable.insert(new OperatorInfo(new Token(")", Token.TokenType.RPAREN), 0, true));
+            symbolTable.insert(new OperatorInfo(new Token(";", Token.TokenType.SEMICOLON), 0, false));
+            symbolTable.insert(new OperatorInfo(new Token("=", Token.TokenType.ASSIGNMENT), 0, false));
             init = true;
         }
         return symbolTable;
     }
 
-
-    @Override
-    public boolean contain(SymbolInfo key) {
-        return symbols.containsKey(key);
-    }
-
-    @Override
-    public SymbolInfo find(SymbolInfo key) {
+    /**
+     * Finds the symbol in the table associated with the given key.
+     *
+     * @param key a dummy symbol.
+     * @return the symbol associated with the given key.
+     */
+    private SymbolInfo find(SymbolInfo key) {
         return symbols.get(key);
     }
 
-    @Override
-    public void insert(SymbolInfo value) {
-        symbols.put(value, value);
-    }
-
-    public boolean isKeyword(String keywordStr) {
-        SymbolInfo inputSymbol = new SymbolInfo(keywordStr, SymbolInfo.SymbolType.KEYWORD);
-        SymbolInfo outputSymbol = find(inputSymbol);
-        return outputSymbol != null && outputSymbol.getSymbolType() == SymbolInfo.SymbolType.KEYWORD;
+    /**
+     * Inserts a new symbol into the table.
+     *
+     * @param value the new symbol.
+     * @return the old symbol if one exists and null otherwise.
+     */
+    public SymbolInfo insert(SymbolInfo value) {
+        return symbols.put(value, value);
     }
 
     /**
-     * Determines if a string is a valid keyword in the table.
+     * Finds a symbol based on the key string and the symbol type.
      *
-     * @param keywordStr  the input string to check.
-     * @param keywordType type of the expected keyword.
-     * @return true if the string is a valid keyword and false otherwise.
+     * @param keyStr     the string that identifies the symbol.
+     * @param symbolType the type of the symbol.
+     * @return a symbol if one exists in the table and null otherwise.
      */
-    public boolean isValidKeyword(String keywordStr, KeywordInfo.KeywordType keywordType) {
-        SymbolInfo inputSymbol = new KeywordInfo(keywordStr, keywordType);
-        SymbolInfo outputSymbol = find(inputSymbol);
-        if (outputSymbol == null || outputSymbol.getSymbolType() != SymbolInfo.SymbolType.KEYWORD) {
-            return false;
-        }
-        KeywordInfo outputKeyword = (KeywordInfo) outputSymbol;
-        return outputKeyword.getKeywordType() == keywordType;
+    private SymbolInfo findSymbol(String keyStr, SymbolInfo.SymbolType symbolType) {
+        Token dummyToken = new Token(keyStr);
+        SymbolInfo dummyInfo = new SymbolInfo(dummyToken, symbolType);
+        return find(dummyInfo);
     }
 
     /**
-     * Determines if a string is a valid id in a given scope.
+     * Finds an ID symbol based on the given key string and the scope.
      *
-     * @param idStr the string to check.
-     * @param scope scope of the expected id.
-     * @return true if the string is a valid id and false otherwise.
+     * @param keyStr the string that identifies the ID.
+     * @param scope  the scope of the ID.
+     * @return an ID symbol if one exists in the table and null otherwise.
      */
-    public boolean isValidID(String idStr, Block scope) {
-        IDInfo inputSymbol = new IDInfo(idStr, scope);
-        SymbolInfo outputSymbol = find(inputSymbol);
-        if (outputSymbol == null || outputSymbol.getSymbolType() != SymbolInfo.SymbolType.ID) {
-            return false;
-        }
-        IDInfo outputID = (IDInfo) outputSymbol;
-        return outputID.equals(inputSymbol);
+    private SymbolInfo findID(String keyStr, Block scope) {
+        Token dummyToken = new Token(keyStr);
+        IDInfo dummyInfo = new IDInfo(dummyToken, scope);
+        return find(dummyInfo);
+    }
+
+    /**
+     * Determines if a string is a valid operator in the symbol table.
+     *
+     * @param opStr the string to be checked.
+     * @return true if the given string is an operator and false otherwise.
+     */
+    public boolean isOperator(String opStr) {
+        SymbolInfo info = findSymbol(opStr, SymbolInfo.SymbolType.OPERATOR);
+        return info != null;
+    }
+
+    /**
+     * Determines if a string is a valid ID in the symbol table.
+     *
+     * @param idStr the string to be checked.
+     * @param scope the scope of the supposed ID.
+     * @return true if the given string is a valid ID and false otherwise.
+     */
+    public boolean isID(String idStr, Block scope) {
+        SymbolInfo info = findID(idStr, scope);
+        return info != null;
+    }
+
+    /**
+     * Gets a keyword symbol in the symbol table.
+     *
+     * @param keywordStr the string that identifies the keyword.
+     * @return a keyword symbol if one exists and null otherwise.
+     */
+    public SymbolInfo getKeyword(String keywordStr) {
+        return findSymbol(keywordStr, SymbolInfo.SymbolType.KEYWORD);
+    }
+
+    /**
+     * Gets an operator symbol in the symbol table.
+     *
+     * @param opStr the string that identifies the operator.
+     * @return an operator symbol if one exists and null otherwise.
+     */
+    public SymbolInfo getOperator(String opStr) {
+        return findSymbol(opStr, SymbolInfo.SymbolType.OPERATOR);
+    }
+
+    /**
+     * Gets a type symbol in the symbol table.
+     *
+     * @param typeStr the string that identifies the type.
+     * @return a type symbol if one exists and null otherwise.
+     */
+    public SymbolInfo getType(String typeStr) {
+        return findSymbol(typeStr, SymbolInfo.SymbolType.TYPE);
     }
 }

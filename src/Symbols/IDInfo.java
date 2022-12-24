@@ -1,13 +1,14 @@
 package Symbols;
 
 import Utilities.Block;
+import Utilities.Token;
 
 public class IDInfo extends SymbolInfo {
 
     private final Block scope;
 
-    public IDInfo(String id, Block scope) {
-        super(id, SymbolType.ID);
+    public IDInfo(Token token, Block scope) {
+        super(token, SymbolType.ID);
         this.scope = scope;
     }
 
@@ -17,18 +18,16 @@ public class IDInfo extends SymbolInfo {
 
     @Override
     public int hashCode() {
-        String hashStr = id + ":" + scope.id();
+        String hashStr = scope.id() + ":" + token.getValue();
         return hashStr.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof IDInfo info)) {
+        if (!super.equals(obj)) {
             return false;
         }
-        return id.equals(info.id) && scope.equals(info.scope);
+        IDInfo info = (IDInfo) obj;
+        return scope.equals(info.getScope());
     }
 }

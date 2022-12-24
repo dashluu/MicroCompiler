@@ -1,21 +1,23 @@
 package Symbols;
 
+import Utilities.Token;
+
 public class SymbolInfo {
 
     public enum SymbolType {
-        UNKNOWN, ID, KEYWORD
+        UNKNOWN, ID, KEYWORD, OPERATOR, TYPE
     }
 
-    protected final String id;
+    protected final Token token;
     protected final SymbolType symbolType;
 
-    public SymbolInfo(String id, SymbolType symbolType) {
-        this.id = id;
+    public SymbolInfo(Token token, SymbolType symbolType) {
+        this.token = token;
         this.symbolType = symbolType;
     }
 
-    public String getId() {
-        return id;
+    public Token getToken() {
+        return token;
     }
 
     public SymbolType getSymbolType() {
@@ -24,7 +26,7 @@ public class SymbolInfo {
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return token.getValue().hashCode();
     }
 
     @Override
@@ -35,6 +37,6 @@ public class SymbolInfo {
         if (!(obj instanceof SymbolInfo info)) {
             return false;
         }
-        return id.equals(info.id);
+        return token.getValue().equals(info.getToken().getValue()) && symbolType == info.getSymbolType();
     }
 }
