@@ -1,8 +1,8 @@
 package ParserSpace;
 
+import Exceptions.SymbolTableException;
 import Exceptions.SyntaxError;
 import LexerSpace.Lexer;
-import Symbols.OperatorInfo;
 import Symbols.SymbolTable;
 import Utilities.Block;
 import Utilities.Node;
@@ -28,7 +28,7 @@ public class ExpressionParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if the read operation causes an IO error.
      */
-    public Node parseExpression(Block scope) throws SyntaxError, IOException {
+    public Node parseExpression(Block scope) throws SyntaxError, IOException, SymbolTableException {
         ArrayList<Node> infixNodes = getExpressionInfixNodes(scope);
         ArrayList<Node> postfixNodes = getPostfixOrder(infixNodes);
         return buildASTFromPostFix(postfixNodes);
@@ -42,7 +42,7 @@ public class ExpressionParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if the read operation causes an IO error.
      */
-    public ArrayList<Node> getExpressionInfixNodes(Block scope) throws SyntaxError, IOException {
+    public ArrayList<Node> getExpressionInfixNodes(Block scope) throws SyntaxError, IOException, SymbolTableException {
         ArrayList<Node> nodes = new ArrayList<>();
         recurParseExpression(nodes, scope);
         return nodes;
@@ -58,7 +58,7 @@ public class ExpressionParser {
      * @throws IOException if the read operation causes an IO error.
      */
     private void recurParseExpressionHelper(ArrayList<Node> nodes, Block scope, String str)
-            throws SyntaxError, IOException {
+            throws SyntaxError, IOException, SymbolTableException {
         // If the size of the list is unchanged, an expression is clearly missing
         int numNodesBefore = nodes.size();
         // Recursively parse an expression
@@ -76,7 +76,7 @@ public class ExpressionParser {
      * @throws IOException if the read operation causes an IO error.
      * @throws SyntaxError if there is a syntax error.
      */
-    private void recurParseExpression(ArrayList<Node> nodes, Block scope) throws SyntaxError, IOException {
+    private void recurParseExpression(ArrayList<Node> nodes, Block scope) throws SyntaxError, IOException, SymbolTableException {
         /*
           Expr = '(' Expr ')' [binary operator] Expr
                = '+/-' Expr [binary operator] Expr
@@ -144,7 +144,7 @@ public class ExpressionParser {
 
         // Check if the token is a valid binary operator
         currTokenStr = currToken.getValue();
-        if (!isOpBinary(currTokenStr)) {
+        if (!symbolTable.isOperatorBinaryOrUnary(currTokenStr)) {
             throw new SyntaxError("Invalid binary operator '" + currTokenStr + "'", lexer.getCurrLine());
         }
         currToken.setType(Token.TokenType.BINARY);
@@ -155,60 +155,13 @@ public class ExpressionParser {
     }
 
     /**
-     * Compares the operators' precedences.
-     *
-     * @param opStr1 the first operator string.
-     * @param opStr2 the second operator string.
-     * @return -1, 0, 1 if the first operator's precedence is less than, equal to, or greater than
-     * that of the second operator respectively.
-     */
-    private int compareOpPreced(String opStr1, String opStr2) {
-        SymbolTable symbolTable = SymbolTable.getInstance();
-        OperatorInfo opInfo1 = (OperatorInfo) symbolTable.getOperator(opStr1);
-        OperatorInfo opInfo2 = (OperatorInfo) symbolTable.getOperator(opStr2);
-        Token.TokenType opTokenType1 = opInfo1.getToken().getType();
-        Token.TokenType opTokenType2 = opInfo2.getToken().getType();
-        if (opTokenType1 == Token.TokenType.UNARY) {
-            return 1;
-        } else if (opTokenType2 == Token.TokenType.UNARY) {
-            return -1;
-        }
-        return Integer.compare(opInfo1.getPreced(), opInfo2.getPreced());
-    }
-
-    /**
-     * Determines if an operator is left-to-right.
-     *
-     * @param opStr the operator string.
-     * @return true if the operator is left-to-right and false otherwise.
-     */
-    private boolean isOpLeftToRight(String opStr) {
-        OperatorInfo opInfo = (OperatorInfo) SymbolTable.getInstance().getOperator(opStr);
-        return opInfo.isLeftToRight();
-    }
-
-    /**
-     * Determines if an operator is binary.
-     *
-     * @param opStr the operator string.
-     * @return true if the operator is binary and false otherwise.
-     */
-    private boolean isOpBinary(String opStr) {
-        OperatorInfo opInfo = (OperatorInfo) SymbolTable.getInstance().getOperator(opStr);
-        if (opInfo == null) {
-            return false;
-        }
-        Token.TokenType opTokenType = opInfo.getToken().getType();
-        return opTokenType == Token.TokenType.BINARY || opTokenType == Token.TokenType.BINARY_UNARY;
-    }
-
-    /**
      * Gets a list of nodes in postfix order.
      *
      * @param nodes list of input nodes.
      * @return a list of nodes in postfix order.
      */
-    private ArrayList<Node> getPostfixOrder(ArrayList<Node> nodes) {
+    private ArrayList<Node> getPostfixOrder(ArrayList<Node> nodes) throws SymbolTableException {
+        SymbolTable symbolTable = SymbolTable.getInstance();
         ArrayList<Node> postfixNodes = new ArrayList<>();
         ArrayDeque<Node> opStack = new ArrayDeque<>();
         Node opNode;
@@ -248,8 +201,8 @@ public class ExpressionParser {
                     stop = opTokenType == Token.TokenType.LPAREN;
                     if (!stop) {
                         opStr = opNode.getToken().getValue();
-                        precedCmp = compareOpPreced(opStr, currToken.getValue());
-                        stop = precedCmp < 0 || (precedCmp == 0 && !isOpLeftToRight(opStr));
+                        precedCmp = symbolTable.compareOperatorPreced(opStr, currToken.getValue());
+                        stop = precedCmp < 0 || (precedCmp == 0 && !symbolTable.isOperatorLeftToRight(opStr));
                     }
                     if (!stop) {
                         postfixNodes.add(opNode);

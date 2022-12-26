@@ -1,5 +1,6 @@
 package Symbols;
 
+import Exceptions.SymbolTableException;
 import Utilities.Block;
 import Utilities.Global;
 import Utilities.Token;
@@ -132,5 +133,68 @@ public class SymbolTable {
      */
     public SymbolInfo getType(String typeStr) {
         return findSymbol(typeStr, SymbolInfo.SymbolType.TYPE);
+    }
+
+    /**
+     * Determines if an operator is left-to-right.
+     *
+     * @param opStr the operator string.
+     * @return true if the operator is left-to-right and false otherwise.
+     * @throws SymbolTableException if the operator is not found in the symbol table.
+     */
+    public boolean isOperatorLeftToRight(String opStr) throws SymbolTableException {
+        SymbolInfo opSymbol = getOperator(opStr);
+        if (opSymbol == null) {
+            throw new SymbolTableException("'" + opStr + "' is not a valid operator in the symbol table");
+        }
+        OperatorInfo opInfo = (OperatorInfo) opSymbol;
+        return opInfo.isLeftToRight();
+    }
+
+    /**
+     * Determines if an operator is binary.
+     *
+     * @param opStr the operator string.
+     * @return true if the operator is binary and false otherwise.
+     * @throws SymbolTableException if the operator is not found in the symbol table.
+     */
+    public boolean isOperatorBinaryOrUnary(String opStr) throws SymbolTableException {
+        SymbolInfo opSymbol = getOperator(opStr);
+        if (opSymbol == null) {
+            throw new SymbolTableException("'" + opStr + "' is not a valid operator in the symbol table");
+        }
+        OperatorInfo opInfo = (OperatorInfo) opSymbol;
+        Token.TokenType opTokenType = opInfo.getToken().getType();
+        return opTokenType == Token.TokenType.BINARY || opTokenType == Token.TokenType.BINARY_UNARY;
+    }
+
+    /**
+     * Compares the operators' precedences.
+     *
+     * @param opStr1 the first operator string.
+     * @param opStr2 the second operator string.
+     * @return -1, 0, 1 if the first operator's precedence is less than, equal to, or greater than
+     * that of the second operator respectively.
+     * @throws SymbolTableException if the one of the operators is not found in the symbol table.
+     */
+    public int compareOperatorPreced(String opStr1, String opStr2) throws SymbolTableException {
+        SymbolInfo opSymbol1 = getOperator(opStr1);
+        if (opSymbol1 == null) {
+            throw new SymbolTableException("'" + opStr1 + "' is not a valid operator in the symbol table");
+        }
+        SymbolInfo opSymbol2 = getOperator(opStr2);
+        if (opSymbol2 == null) {
+            throw new SymbolTableException("'" + opStr2 + "' is not a valid operator in the symbol table");
+        }
+        OperatorInfo opInfo1 = (OperatorInfo) opSymbol1;
+        OperatorInfo opInfo2 = (OperatorInfo) opSymbol2;
+        Token.TokenType opTokenType1 = opInfo1.getToken().getType();
+        Token.TokenType opTokenType2 = opInfo2.getToken().getType();
+        if (opTokenType1 == Token.TokenType.UNARY) {
+            return 1;
+        } else if (opTokenType2 == Token.TokenType.UNARY) {
+            return -1;
+        }
+        return Integer.compare(opInfo1.getPreced(), opInfo2.getPreced());
     }
 }
