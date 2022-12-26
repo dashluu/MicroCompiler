@@ -1,5 +1,6 @@
 package ParserSpace;
 
+import Exceptions.SymbolTableException;
 import Exceptions.SyntaxError;
 import LexerSpace.Lexer;
 import Symbols.IDInfo;
@@ -20,7 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ExpressionParserTest {
 
-    private ArrayList<Node> getExpressionInfixNodesHelper(String inputStr, Block scope) throws SyntaxError, IOException {
+    private ArrayList<Node> getExpressionInfixNodesHelper(String inputStr, Block scope)
+            throws SyntaxError, IOException, SymbolTableException {
         BufferedReader reader = new BufferedReader(new StringReader(inputStr));
         Lexer lexer = new Lexer(reader);
         ExpressionParser expressionParser = new ExpressionParser(lexer);
@@ -56,7 +58,7 @@ class ExpressionParserTest {
         try {
             ArrayList<Node> actualInfixNodes = getExpressionInfixNodesHelper(inputStr, Global.globalScope);
             assertEquals(expectedInfixNodes, actualInfixNodes);
-        } catch (SyntaxError | IOException e) {
+        } catch (SyntaxError | IOException | SymbolTableException e) {
             e.printStackTrace();
         }
     }

@@ -1,3 +1,4 @@
+import Exceptions.SymbolTableException;
 import Exceptions.SyntaxError;
 import LexerSpace.Lexer;
 import ParserSpace.ExpressionParser;
@@ -11,7 +12,7 @@ import java.io.IOException;
 import java.io.StringReader;
 
 public class Main {
-    public static void main(String[] args) throws SyntaxError, IOException {
+    public static void main(String[] args) throws SyntaxError, IOException, SymbolTableException {
         String str = "    a+a  *(-2.e-1+--(75))\t";
         BufferedReader reader = new BufferedReader(new StringReader(str));
         Lexer lexer = new Lexer(reader);
