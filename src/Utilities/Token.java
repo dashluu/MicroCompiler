@@ -2,8 +2,9 @@ package Utilities;
 
 public class Token {
     public enum TokenType {
-        UNKNOWN, ID_DECL, INT_TYPE, FLOAT_TYPE, ID, NUM, BINARY_UNARY,
-        BINARY, UNARY, LPAREN, RPAREN, COLON, SEMICOLON, DOT, ASSIGNMENT
+        UNKNOWN, ID_DECL, INT_TYPE, FLOAT_TYPE, ID, NUM,
+        PLUS, MINUS, ADD, SUB, MULT, DIV,
+        LPAREN, RPAREN, COLON, SEMICOLON, DOT, ASSIGNMENT
     }
 
     private final String value;
