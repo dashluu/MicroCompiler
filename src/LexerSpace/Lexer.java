@@ -126,10 +126,11 @@ public class Lexer {
         }
 
         Token token = getAlnumUnderscoreToken();
+        SymbolTable symbolTable = SymbolTable.getInstance();
+
         if (token != null) {
             // Check if the token is a keyword, if it is, change its token type
             String tokenStr = token.getValue();
-            SymbolTable symbolTable = SymbolTable.getInstance();
             SymbolInfo info = symbolTable.getKeyword(tokenStr);
             if (info != null) {
                 token.setType(info.getToken().getType());
@@ -151,14 +152,14 @@ public class Lexer {
         token = getOperatorToken();
         if (token != null) {
             // Get the correct operator type using the symbol table
-            SymbolInfo info = SymbolTable.getInstance().getOperator(token.getValue());
+            SymbolInfo info = symbolTable.getOperator(token.getValue());
             if (info != null) {
                 token.setType(info.getToken().getType());
                 return token;
             }
             return token;
         }
-        throw new SyntaxError("Invalid syntax", getCurrLine());
+        throw new SyntaxError("Unable to get next token because of invalid syntax", getCurrLine());
     }
 
     /**
