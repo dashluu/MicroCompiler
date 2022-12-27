@@ -34,9 +34,9 @@ public class SymbolInfo {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof SymbolInfo info)) {
+        if (!(obj instanceof SymbolInfo symbol)) {
             return false;
         }
-        return token.getValue().equals(info.getToken().getValue()) && symbolType == info.getSymbolType();
+        return token.getValue().equals(symbol.getToken().getValue()) && symbolType == symbol.getSymbolType();
     }
 }
