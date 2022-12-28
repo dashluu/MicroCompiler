@@ -5,15 +5,12 @@ import Utilities.Token;
 import java.util.ArrayList;
 
 public class Node {
-    private final Token token;
+
+    private final NodeType nodeType;
     private final ArrayList<Node> children = new ArrayList<>();
 
-    public Node(Token token) {
-        this.token = token;
-    }
-
-    public Token getToken() {
-        return token;
+    public Node(NodeType nodeType) {
+        this.nodeType = nodeType;
     }
 
     public Node getChild(int index) {
@@ -33,7 +30,7 @@ public class Node {
 
     @Override
     public String toString() {
-        return token.toString();
+        return nodeType.toString();
     }
 
     @Override
@@ -44,6 +41,7 @@ public class Node {
         if (!(obj instanceof Node node)) {
             return false;
         }
-        return token.equals(node.token);
+        return nodeType == node.nodeType;
     }
+
 }
