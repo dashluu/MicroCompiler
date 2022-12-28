@@ -20,6 +20,10 @@ public class ExpressionParser {
         this.lexer = lexer;
     }
 
+    public Lexer getLexer() {
+        return lexer;
+    }
+
     /**
      * Consumes an expression in a given scope and produces an AST root node associated with the parsed expression.
      *
@@ -136,13 +140,19 @@ public class ExpressionParser {
         }
 
         currToken = lexer.getNextToken();
+
         // Check if the next token is empty or ')'
         if (currToken == null) {
             return;
-        } else if (currToken.getType() == TokenType.RPAREN) {
+        }
+
+        currTokenStr = currToken.getValue();
+        currTokenType = currToken.getType();
+
+        if (currTokenType == TokenType.RPAREN) {
             // Check if ')' is redundant
             if (numParen > 0) {
-                lexer.putBack(currToken.getValue());
+                lexer.putBack(currTokenStr + " ");
                 return;
             } else {
                 throw new SyntaxError("Redundant ')'", lexer.getCurrLine());
@@ -150,8 +160,6 @@ public class ExpressionParser {
         }
 
         // Check if the token is a valid binary operator
-        currTokenStr = currToken.getValue();
-        currTokenType = currToken.getType();
         isOpBinary = opTable.isOperator(currTokenType) && opTable.isOperatorBinary(currTokenType);
 
         if (!isOpBinary) {
