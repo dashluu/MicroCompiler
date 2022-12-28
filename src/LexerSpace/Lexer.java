@@ -40,7 +40,7 @@ public class Lexer {
     }
 
     private final Buffer buffer;
-    private final static String SPECIAL_CHARS = "()+-*/&|%<>=,.;:";
+    private final static String SPECIAL_CHARS = "()+-*/&|%<>=,.;:_";
     private final static int EOS = -1;
 
     public Lexer(BufferedReader reader) {
