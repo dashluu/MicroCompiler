@@ -1,7 +1,5 @@
 package ParserSpace;
 
-import Utilities.Node;
-
 public interface IASTNodeVisitor {
     void visit(Node node);
 

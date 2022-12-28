@@ -4,10 +4,6 @@ import Utilities.Token;
 
 public class SymbolInfo {
 
-    public enum SymbolType {
-        UNKNOWN, ID, KEYWORD, OPERATOR, TYPE
-    }
-
     protected final Token token;
     protected final SymbolType symbolType;
 

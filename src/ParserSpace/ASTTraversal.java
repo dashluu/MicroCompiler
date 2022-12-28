@@ -1,7 +1,5 @@
 package ParserSpace;
 
-import Utilities.Node;
-
 public class ASTTraversal {
     private final IASTNodeVisitor nodeVisitor;
 

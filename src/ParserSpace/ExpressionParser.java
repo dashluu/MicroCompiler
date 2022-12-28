@@ -5,8 +5,8 @@ import LexerSpace.Lexer;
 import Operators.OperatorTable;
 import Symbols.SymbolTable;
 import Utilities.Block;
-import Utilities.Node;
 import Utilities.Token;
+import Utilities.TokenType;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -91,28 +91,28 @@ public class ExpressionParser {
         SymbolTable symbolTable = SymbolTable.getInstance();
         OperatorTable opTable = OperatorTable.getInstance();
         String currTokenStr = currToken.getValue();
-        Token.TokenType currTokenType = currToken.getType();
+        TokenType currTokenType = currToken.getType();
         boolean isOpBinary = opTable.isOperator(currTokenType) && opTable.isOperatorBinary(currTokenType);
 
         // Check if the expression starts with '(', a binary operator, an ID, or a number
-        if (currTokenType != Token.TokenType.LPAREN && !isOpBinary &&
-                currTokenType != Token.TokenType.ID && currTokenType != Token.TokenType.NUM) {
+        if (currTokenType != TokenType.LPAREN && !isOpBinary &&
+                currTokenType != TokenType.ID && currTokenType != TokenType.NUM) {
             throw new SyntaxError("Invalid expression syntax at '" + currTokenStr + "'", lexer.getCurrLine());
         }
 
-        if (currTokenType == Token.TokenType.ID) {
+        if (currTokenType == TokenType.ID) {
             // Check if the token is a valid ID
             if (!symbolTable.isID(currTokenStr, scope)) {
                 throw new SyntaxError("Invalid variable '" + currTokenStr + "'", lexer.getCurrLine());
             }
             nodes.add(new Node(currToken));
-        } else if (currTokenType == Token.TokenType.NUM) {
+        } else if (currTokenType == TokenType.NUM) {
             // Consume a number
             nodes.add(new Node(currToken));
         } else if (isOpBinary) {
             // Try to map the binary operator to a unary operator since a token can be both a binary or a unary operator
             // For example, '+' and '-'
-            Token.TokenType unaryOpTokenType = opTable.mapBinaryToUnaryOperator(currTokenType);
+            TokenType unaryOpTokenType = opTable.mapBinaryToUnaryOperator(currTokenType);
             if (unaryOpTokenType == null) {
                 throw new SyntaxError("Invalid unary operator '" + currTokenStr + "'", lexer.getCurrLine());
             }
@@ -128,7 +128,7 @@ public class ExpressionParser {
             recurParseExpressionHelper(nodes, scope, currTokenStr);
             // Consume ')' and decrement the number of parentheses
             currToken = lexer.getNextToken();
-            if (currToken == null || currToken.getType() != Token.TokenType.RPAREN) {
+            if (currToken == null || currToken.getType() != TokenType.RPAREN) {
                 throw new SyntaxError("Missing ')'", lexer.getCurrLine());
             }
             nodes.add(new Node(currToken));
@@ -139,7 +139,7 @@ public class ExpressionParser {
         // Check if the next token is empty or ')'
         if (currToken == null) {
             return;
-        } else if (currToken.getType() == Token.TokenType.RPAREN) {
+        } else if (currToken.getType() == TokenType.RPAREN) {
             // Check if ')' is redundant
             if (numParen > 0) {
                 lexer.putBack(currToken.getValue());
@@ -175,8 +175,8 @@ public class ExpressionParser {
         ArrayDeque<Node> opStack = new ArrayDeque<>();
         Node opNode;
         Token currToken;
-        Token.TokenType currTokenType;
-        Token.TokenType opTokenType;
+        TokenType currTokenType;
+        TokenType opTokenType;
         boolean stop;
         int precedCmp;
 
@@ -184,17 +184,17 @@ public class ExpressionParser {
             currToken = currNode.getToken();
             currTokenType = currToken.getType();
             // The token is an operand so push it directly to the postfix list
-            if (currTokenType == Token.TokenType.ID || currTokenType == Token.TokenType.NUM) {
+            if (currTokenType == TokenType.ID || currTokenType == TokenType.NUM) {
                 postfixNodes.add(currNode);
-            } else if (currTokenType == Token.TokenType.LPAREN) {
+            } else if (currTokenType == TokenType.LPAREN) {
                 opStack.add(currNode);
-            } else if (currTokenType == Token.TokenType.RPAREN) {
+            } else if (currTokenType == TokenType.RPAREN) {
                 stop = false;
                 // Pop the operator stack until '(' is encountered, discard it without adding it to the postfix list
                 while (!opStack.isEmpty() && !stop) {
                     opNode = opStack.removeLast();
                     opTokenType = opNode.getToken().getType();
-                    stop = opTokenType == Token.TokenType.LPAREN;
+                    stop = opTokenType == TokenType.LPAREN;
                     if (!stop) {
                         postfixNodes.add(opNode);
                     }
@@ -206,7 +206,7 @@ public class ExpressionParser {
                 while (!opStack.isEmpty() && !stop) {
                     opNode = opStack.getLast();
                     opTokenType = opNode.getToken().getType();
-                    stop = opTokenType == Token.TokenType.LPAREN;
+                    stop = opTokenType == TokenType.LPAREN;
                     if (!stop) {
                         precedCmp = opTable.compareOperatorPreced(opTokenType, currToken.getType());
                         stop = precedCmp < 0;
@@ -242,14 +242,14 @@ public class ExpressionParser {
 
         ArrayDeque<Node> tempStack = new ArrayDeque<>();
         Token currToken;
-        Token.TokenType currTokenType;
+        TokenType currTokenType;
         Node operandNode1;
         Node operandNode2;
 
         for (Node currNode : postfixNodes) {
             currToken = currNode.getToken();
             currTokenType = currToken.getType();
-            if (currTokenType == Token.TokenType.ID || currTokenType == Token.TokenType.NUM) {
+            if (currTokenType == TokenType.ID || currTokenType == TokenType.NUM) {
                 // Push the operand onto the temp stack
                 tempStack.add(currNode);
             } else if (OperatorTable.getInstance().isOperatorUnary(currTokenType)) {

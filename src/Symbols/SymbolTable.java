@@ -3,6 +3,7 @@ package Symbols;
 import Utilities.Block;
 import Utilities.Global;
 import Utilities.Token;
+import Utilities.TokenType;
 
 import java.util.HashMap;
 
@@ -14,23 +15,28 @@ public class SymbolTable {
     private SymbolTable() {
     }
 
+    /**
+     * Initializes the only instance of the symbol table if it has not been initialized and then returns it.
+     *
+     * @return an SymbolTable object.
+     */
     public static SymbolTable getInstance() {
         if (!init) {
             // Initialize the symbol table
             symbolTable = new SymbolTable();
-            symbolTable.set(new KeywordInfo(new Token(Global.ID_DECL, Token.TokenType.ID_DECL)));
-            symbolTable.set(new TypeInfo(new Token(Global.INT_TYPE_ID, Token.TokenType.INT_TYPE)));
-            symbolTable.set(new TypeInfo(new Token(Global.FLOAT_TYPE_ID, Token.TokenType.FLOAT_TYPE)));
-            symbolTable.set(new OperatorInfo(new Token("+", Token.TokenType.ADD)));
-            symbolTable.set(new OperatorInfo(new Token("-", Token.TokenType.SUB)));
-            symbolTable.set(new OperatorInfo(new Token("*", Token.TokenType.MULT)));
-            symbolTable.set(new OperatorInfo(new Token("/", Token.TokenType.DIV)));
-            symbolTable.set(new OperatorInfo(new Token(".", Token.TokenType.DOT)));
-            symbolTable.set(new OperatorInfo(new Token(":", Token.TokenType.COLON)));
-            symbolTable.set(new OperatorInfo(new Token("(", Token.TokenType.LPAREN)));
-            symbolTable.set(new OperatorInfo(new Token(")", Token.TokenType.RPAREN)));
-            symbolTable.set(new OperatorInfo(new Token(";", Token.TokenType.SEMICOLON)));
-            symbolTable.set(new OperatorInfo(new Token("=", Token.TokenType.ASSIGNMENT)));
+            symbolTable.set(new KeywordInfo(new Token(Global.ID_DECL, TokenType.ID_DECL)));
+            symbolTable.set(new TypeInfo(new Token(Global.INT_TYPE_ID, TokenType.INT_TYPE)));
+            symbolTable.set(new TypeInfo(new Token(Global.FLOAT_TYPE_ID, TokenType.FLOAT_TYPE)));
+            symbolTable.set(new OperatorInfo(new Token("+", TokenType.ADD)));
+            symbolTable.set(new OperatorInfo(new Token("-", TokenType.SUB)));
+            symbolTable.set(new OperatorInfo(new Token("*", TokenType.MULT)));
+            symbolTable.set(new OperatorInfo(new Token("/", TokenType.DIV)));
+            symbolTable.set(new OperatorInfo(new Token(".", TokenType.DOT)));
+            symbolTable.set(new OperatorInfo(new Token(":", TokenType.COLON)));
+            symbolTable.set(new OperatorInfo(new Token("(", TokenType.LPAREN)));
+            symbolTable.set(new OperatorInfo(new Token(")", TokenType.RPAREN)));
+            symbolTable.set(new OperatorInfo(new Token(";", TokenType.SEMICOLON)));
+            symbolTable.set(new OperatorInfo(new Token("=", TokenType.ASSIGNMENT)));
 
             init = true;
         }
@@ -64,7 +70,7 @@ public class SymbolTable {
      * @param symbolType the type of the symbol.
      * @return a symbol if one exists in the table and null otherwise.
      */
-    private SymbolInfo getSymbol(String keyStr, SymbolInfo.SymbolType symbolType) {
+    private SymbolInfo getSymbol(String keyStr, SymbolType symbolType) {
         Token dummyToken = new Token(keyStr);
         SymbolInfo dummyInfo = new SymbolInfo(dummyToken, symbolType);
         return get(dummyInfo);
@@ -90,7 +96,7 @@ public class SymbolTable {
      * @return a keyword symbol if one exists and null otherwise.
      */
     public SymbolInfo getKeyword(String keywordStr) {
-        return getSymbol(keywordStr, SymbolInfo.SymbolType.KEYWORD);
+        return getSymbol(keywordStr, SymbolType.KEYWORD);
     }
 
     /**
@@ -100,7 +106,7 @@ public class SymbolTable {
      * @return an operator symbol if one exists and null otherwise.
      */
     public SymbolInfo getOperator(String opStr) {
-        return getSymbol(opStr, SymbolInfo.SymbolType.OPERATOR);
+        return getSymbol(opStr, SymbolType.OPERATOR);
     }
 
     /**
@@ -110,7 +116,7 @@ public class SymbolTable {
      * @return a type symbol if one exists and null otherwise.
      */
     public SymbolInfo getType(String typeStr) {
-        return getSymbol(typeStr, SymbolInfo.SymbolType.TYPE);
+        return getSymbol(typeStr, SymbolType.TYPE);
     }
 
     /**
@@ -120,7 +126,7 @@ public class SymbolTable {
      * @return true if the given string is an operator and false otherwise.
      */
     public boolean isOperator(String opStr) {
-        SymbolInfo symbol = getSymbol(opStr, SymbolInfo.SymbolType.OPERATOR);
+        SymbolInfo symbol = getSymbol(opStr, SymbolType.OPERATOR);
         return symbol != null;
     }
 
@@ -143,7 +149,7 @@ public class SymbolTable {
      * @return true if the given string is a valid keyword and false otherwise.
      */
     public boolean isKeyword(String keywordStr) {
-        SymbolInfo symbol = getSymbol(keywordStr, SymbolInfo.SymbolType.KEYWORD);
+        SymbolInfo symbol = getSymbol(keywordStr, SymbolType.KEYWORD);
         return symbol != null;
     }
 
@@ -154,7 +160,7 @@ public class SymbolTable {
      * @return true if the given string is a valid type and false otherwise.
      */
     public boolean isType(String typeStr) {
-        SymbolInfo symbol = getSymbol(typeStr, SymbolInfo.SymbolType.TYPE);
+        SymbolInfo symbol = getSymbol(typeStr, SymbolType.TYPE);
         return symbol != null;
     }
 }

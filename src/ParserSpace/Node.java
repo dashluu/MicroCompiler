@@ -1,4 +1,6 @@
-package Utilities;
+package ParserSpace;
+
+import Utilities.Token;
 
 import java.util.ArrayList;
 

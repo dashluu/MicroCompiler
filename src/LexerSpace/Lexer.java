@@ -4,6 +4,7 @@ import Exceptions.SyntaxError;
 import Symbols.SymbolInfo;
 import Symbols.SymbolTable;
 import Utilities.Token;
+import Utilities.TokenType;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -195,7 +196,7 @@ public class Lexer {
 
         // The string cannot be empty
         // Set the type to ID and check it later
-        return new Token(tokenStr.toString(), Token.TokenType.ID);
+        return new Token(tokenStr.toString(), TokenType.ID);
     }
 
     /**
@@ -207,7 +208,7 @@ public class Lexer {
      * @return a token containing the string if the operation succeeds and null otherwise.
      * @throws IOException if there is an error while reading.
      */
-    private Token getStrToken(String strToMatch, StringBuilder readStrBuffer, Token.TokenType tokenType)
+    private Token getStrToken(String strToMatch, StringBuilder readStrBuffer, TokenType tokenType)
             throws IOException {
         // Clears the buffer
         readStrBuffer.setLength(0);
@@ -259,7 +260,7 @@ public class Lexer {
             return null;
         }
 
-        return new Token(tokenStr.toString(), Token.TokenType.UNKNOWN);
+        return new Token(tokenStr.toString(), TokenType.UNKNOWN);
     }
 
     /**
@@ -282,7 +283,7 @@ public class Lexer {
             return null;
         }
 
-        return new Token(tokenStr.toString(), Token.TokenType.NUM);
+        return new Token(tokenStr.toString(), TokenType.NUM);
     }
 
     /**
@@ -306,7 +307,7 @@ public class Lexer {
         }
 
         // Reads '.'
-        Token decPointToken = getStrToken(".", tempStr, Token.TokenType.UNKNOWN);
+        Token decPointToken = getStrToken(".", tempStr, TokenType.UNKNOWN);
         boolean missingDecPoint = decPointToken == null;
         if (!missingDecPoint) {
             tokenStr.append(".");
@@ -329,7 +330,7 @@ public class Lexer {
             }
         }
 
-        return new Token(tokenStr.toString(), Token.TokenType.NUM);
+        return new Token(tokenStr.toString(), TokenType.NUM);
     }
 
     /**
@@ -354,12 +355,12 @@ public class Lexer {
 
         tokenStr.append(tempToken.getValue());
         // Get 'e'
-        tempToken = getStrToken("e", tempStr, Token.TokenType.UNKNOWN);
+        tempToken = getStrToken("e", tempStr, TokenType.UNKNOWN);
         if (tempToken == null) {
             // Put back what has been read
             buffer.putBack(tempStr.toString());
             if ((c = buffer.peek()) == EOS || isSpace(c) || isSpecialChar(c) && c != '.') {
-                return new Token(tokenStr.toString(), Token.TokenType.NUM);
+                return new Token(tokenStr.toString(), TokenType.NUM);
             } else {
                 throw new SyntaxError("Invalid numeric expression after '" + tokenStr + "'", getCurrLine());
             }
@@ -367,12 +368,12 @@ public class Lexer {
         tokenStr.append("e");
 
         // Get +/-
-        tempToken = getStrToken("+", tempStr, Token.TokenType.UNKNOWN);
+        tempToken = getStrToken("+", tempStr, TokenType.UNKNOWN);
         if (tempToken == null) {
             // Put back what has been read
             buffer.putBack(tempStr.toString());
             // Reads '-' if '+' is not present
-            tempToken = getStrToken("-", tempStr, Token.TokenType.UNKNOWN);
+            tempToken = getStrToken("-", tempStr, TokenType.UNKNOWN);
             if (tempToken == null) {
                 // Put back what has been read
                 buffer.putBack(tempStr.toString());
@@ -389,6 +390,6 @@ public class Lexer {
             throw new SyntaxError("Invalid numeric expression after '" + tokenStr + "'", getCurrLine());
         }
         tokenStr.append(tempToken.getValue());
-        return new Token(tokenStr.toString(), Token.TokenType.NUM);
+        return new Token(tokenStr.toString(), TokenType.NUM);
     }
 }

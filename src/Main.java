@@ -5,6 +5,7 @@ import Symbols.IDInfo;
 import Symbols.SymbolTable;
 import Utilities.Global;
 import Utilities.Token;
+import Utilities.TokenType;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +17,7 @@ public class Main {
         BufferedReader reader = new BufferedReader(new StringReader(str));
         Lexer lexer = new Lexer(reader);
         ExpressionParser expressionParser = new ExpressionParser(lexer);
-        SymbolTable.getInstance().set(new IDInfo(new Token("a", Token.TokenType.ID), Global.globalScope));
+        SymbolTable.getInstance().set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope));
         expressionParser.parseExpression(Global.globalScope);
     }
 }

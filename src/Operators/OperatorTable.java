@@ -1,12 +1,12 @@
 package Operators;
 
-import Utilities.Token;
+import Utilities.TokenType;
 
 import java.util.HashMap;
 
 public class OperatorTable {
-    private final HashMap<Token.TokenType, Operator> operators = new HashMap<>();
-    private final HashMap<Token.TokenType, Token.TokenType> binaryToUnaryOps = new HashMap<>();
+    private final HashMap<TokenType, Operator> operators = new HashMap<>();
+    private final HashMap<TokenType, TokenType> binaryToUnaryOps = new HashMap<>();
     private static OperatorTable opTable;
     private static boolean init = false;
 
@@ -22,22 +22,22 @@ public class OperatorTable {
         if (!init) {
             // Initialize the operator table
             opTable = new OperatorTable();
-            opTable.set(new Operator(Token.TokenType.ADD, 0, true, Operator.OperatorType.BINARY));
-            opTable.set(new Operator(Token.TokenType.SUB, 0, true, Operator.OperatorType.BINARY));
-            opTable.set(new Operator(Token.TokenType.PLUS, 2, false, Operator.OperatorType.UNARY));
-            opTable.set(new Operator(Token.TokenType.MINUS, 2, false, Operator.OperatorType.UNARY));
-            opTable.set(new Operator(Token.TokenType.MULT, 1, true, Operator.OperatorType.BINARY));
-            opTable.set(new Operator(Token.TokenType.DIV, 1, true, Operator.OperatorType.BINARY));
-            opTable.set(new Operator(Token.TokenType.DOT, 0, true, Operator.OperatorType.BINARY));
-            opTable.set(new Operator(Token.TokenType.COLON, 0, true, Operator.OperatorType.BINARY));
-            opTable.set(new Operator(Token.TokenType.LPAREN, 0, true, Operator.OperatorType.NONE));
-            opTable.set(new Operator(Token.TokenType.RPAREN, 0, true, Operator.OperatorType.NONE));
-            opTable.set(new Operator(Token.TokenType.SEMICOLON, 0, false, Operator.OperatorType.NONE));
-            opTable.set(new Operator(Token.TokenType.ASSIGNMENT, 0, false, Operator.OperatorType.BINARY));
+            opTable.set(new Operator(TokenType.ADD, 0, true, Operator.OperatorType.BINARY));
+            opTable.set(new Operator(TokenType.SUB, 0, true, Operator.OperatorType.BINARY));
+            opTable.set(new Operator(TokenType.PLUS, 2, false, Operator.OperatorType.UNARY));
+            opTable.set(new Operator(TokenType.MINUS, 2, false, Operator.OperatorType.UNARY));
+            opTable.set(new Operator(TokenType.MULT, 1, true, Operator.OperatorType.BINARY));
+            opTable.set(new Operator(TokenType.DIV, 1, true, Operator.OperatorType.BINARY));
+            opTable.set(new Operator(TokenType.DOT, 0, true, Operator.OperatorType.BINARY));
+            opTable.set(new Operator(TokenType.COLON, 0, true, Operator.OperatorType.BINARY));
+            opTable.set(new Operator(TokenType.LPAREN, 0, true, Operator.OperatorType.NONE));
+            opTable.set(new Operator(TokenType.RPAREN, 0, true, Operator.OperatorType.NONE));
+            opTable.set(new Operator(TokenType.SEMICOLON, 0, false, Operator.OperatorType.NONE));
+            opTable.set(new Operator(TokenType.ASSIGNMENT, 0, false, Operator.OperatorType.BINARY));
 
             // Initialize mapping from binary to unary operators
-            opTable.binaryToUnaryOps.put(Token.TokenType.ADD, Token.TokenType.PLUS);
-            opTable.binaryToUnaryOps.put(Token.TokenType.SUB, Token.TokenType.MINUS);
+            opTable.binaryToUnaryOps.put(TokenType.ADD, TokenType.PLUS);
+            opTable.binaryToUnaryOps.put(TokenType.SUB, TokenType.MINUS);
 
             init = true;
         }
@@ -50,7 +50,7 @@ public class OperatorTable {
      * @param opID the operator ID.
      * @return the operator associated with the given ID.
      */
-    private Operator get(Token.TokenType opID) {
+    private Operator get(TokenType opID) {
         return operators.get(opID);
     }
 
@@ -70,7 +70,7 @@ public class OperatorTable {
      * @param tokenType type of the token.
      * @return true if the token is an operator and false otherwise.
      */
-    public boolean isOperator(Token.TokenType tokenType) {
+    public boolean isOperator(TokenType tokenType) {
         return get(tokenType) != null;
     }
 
@@ -80,7 +80,7 @@ public class OperatorTable {
      * @param opID the operator ID.
      * @return true if the operator is binary and false otherwise.
      */
-    public boolean isOperatorBinary(Token.TokenType opID) {
+    public boolean isOperatorBinary(TokenType opID) {
         Operator op = opTable.get(opID);
         return op.getType() == Operator.OperatorType.BINARY;
     }
@@ -91,7 +91,7 @@ public class OperatorTable {
      * @param opID the operator ID.
      * @return true if the operator is unary and false otherwise.
      */
-    public boolean isOperatorUnary(Token.TokenType opID) {
+    public boolean isOperatorUnary(TokenType opID) {
         return !isOperatorBinary(opID);
     }
 
@@ -101,7 +101,7 @@ public class OperatorTable {
      * @param opID the operator ID.
      * @return true if the operator is left-to-right and false otherwise.
      */
-    public boolean isOperatorLeftToRight(Token.TokenType opID) {
+    public boolean isOperatorLeftToRight(TokenType opID) {
         Operator op = opTable.get(opID);
         return op.isLeftToRight();
     }
@@ -114,7 +114,7 @@ public class OperatorTable {
      * @return -1, 0, 1 if the first operator's precedence is less than, equal to, or greater than
      * that of the second operator respectively.
      */
-    public int compareOperatorPreced(Token.TokenType opID1, Token.TokenType opID2) {
+    public int compareOperatorPreced(TokenType opID1, TokenType opID2) {
         Operator op1 = opTable.get(opID1);
         Operator op2 = opTable.get(opID2);
         int precedCmp = Integer.compare(op1.getPreced(), op2.getPreced());
@@ -128,7 +128,13 @@ public class OperatorTable {
         return op1.isLeftToRight() ? 1 : -1;
     }
 
-    public Token.TokenType mapBinaryToUnaryOperator(Token.TokenType opID) {
+    /**
+     * Maps a binary operator to a unary operator with the same string representation.
+     *
+     * @param opID the operator's binary ID.
+     * @return the operator's unary ID.
+     */
+    public TokenType mapBinaryToUnaryOperator(TokenType opID) {
         return binaryToUnaryOps.get(opID);
     }
 }
