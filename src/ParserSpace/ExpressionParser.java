@@ -33,8 +33,8 @@ public class ExpressionParser {
      * @throws IOException if the read operation causes an IO error.
      */
     public Node parseExpression(Block scope) throws SyntaxError, IOException {
-        ArrayList<Node> infixNodes = getExpressionInfixNodes(scope);
-        ArrayList<Node> postfixNodes = getPostfixOrder(infixNodes);
+        ArrayList<TokenNode> infixNodes = getExpressionInfixNodes(scope);
+        ArrayList<TokenNode> postfixNodes = getPostfixOrder(infixNodes);
         return buildASTFromPostFix(postfixNodes);
     }
 
@@ -46,8 +46,8 @@ public class ExpressionParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if the read operation causes an IO error.
      */
-    public ArrayList<Node> getExpressionInfixNodes(Block scope) throws SyntaxError, IOException {
-        ArrayList<Node> nodes = new ArrayList<>();
+    public ArrayList<TokenNode> getExpressionInfixNodes(Block scope) throws SyntaxError, IOException {
+        ArrayList<TokenNode> nodes = new ArrayList<>();
         recurParseExpression(nodes, scope);
         return nodes;
     }
@@ -61,7 +61,7 @@ public class ExpressionParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if the read operation causes an IO error.
      */
-    private void recurParseExpressionHelper(ArrayList<Node> nodes, Block scope, String str)
+    private void recurParseExpressionHelper(ArrayList<TokenNode> nodes, Block scope, String str)
             throws SyntaxError, IOException {
         // If the size of the list is unchanged, an expression is clearly missing
         int numNodesBefore = nodes.size();
@@ -80,7 +80,7 @@ public class ExpressionParser {
      * @throws IOException if the read operation causes an IO error.
      * @throws SyntaxError if there is a syntax error.
      */
-    private void recurParseExpression(ArrayList<Node> nodes, Block scope) throws SyntaxError, IOException {
+    private void recurParseExpression(ArrayList<TokenNode> nodes, Block scope) throws SyntaxError, IOException {
         /*
           Expr = '(' Expr ')' [binary operator] Expr
                = '+/-' Expr [binary operator] Expr
@@ -109,10 +109,10 @@ public class ExpressionParser {
             if (!symbolTable.isID(currTokenStr, scope)) {
                 throw new SyntaxError("Invalid variable '" + currTokenStr + "'", lexer.getCurrLine());
             }
-            nodes.add(new Node(currToken));
+            nodes.add(new TokenNode(currToken));
         } else if (currTokenType == TokenType.NUM) {
             // Consume a number
-            nodes.add(new Node(currToken));
+            nodes.add(new TokenNode(currToken));
         } else if (isOpBinary) {
             // Try to map the binary operator to a unary operator since a token can be both a binary or a unary operator
             // For example, '+' and '-'
@@ -121,12 +121,12 @@ public class ExpressionParser {
                 throw new SyntaxError("Invalid unary operator '" + currTokenStr + "'", lexer.getCurrLine());
             }
             currToken.setType(unaryOpTokenType);
-            nodes.add(new Node(currToken));
+            nodes.add(new TokenNode(currToken));
             // Recursively parse an expression
             recurParseExpressionHelper(nodes, scope, currTokenStr);
         } else {
             // Consume '(' and increment the number of parentheses
-            nodes.add(new Node(currToken));
+            nodes.add(new TokenNode(currToken));
             ++numParen;
             // Recursively parse an expression
             recurParseExpressionHelper(nodes, scope, currTokenStr);
@@ -135,7 +135,7 @@ public class ExpressionParser {
             if (currToken == null || currToken.getType() != TokenType.RPAREN) {
                 throw new SyntaxError("Missing ')'", lexer.getCurrLine());
             }
-            nodes.add(new Node(currToken));
+            nodes.add(new TokenNode(currToken));
             --numParen;
         }
 
@@ -165,7 +165,7 @@ public class ExpressionParser {
         if (!isOpBinary) {
             throw new SyntaxError("Invalid binary operator '" + currTokenStr + "'", lexer.getCurrLine());
         }
-        nodes.add(new Node(currToken));
+        nodes.add(new TokenNode(currToken));
 
         // Recursively parse an expression
         recurParseExpressionHelper(nodes, scope, currTokenStr);
@@ -177,18 +177,17 @@ public class ExpressionParser {
      * @param nodes list of input nodes.
      * @return a list of nodes in postfix order.
      */
-    private ArrayList<Node> getPostfixOrder(ArrayList<Node> nodes) {
+    private ArrayList<TokenNode> getPostfixOrder(ArrayList<TokenNode> nodes) {
         OperatorTable opTable = OperatorTable.getInstance();
-        ArrayList<Node> postfixNodes = new ArrayList<>();
-        ArrayDeque<Node> opStack = new ArrayDeque<>();
-        Node opNode;
+        ArrayList<TokenNode> postfixNodes = new ArrayList<>();
+        ArrayDeque<TokenNode> opStack = new ArrayDeque<>();
+        TokenNode opNode;
         Token currToken;
-        TokenType currTokenType;
-        TokenType opTokenType;
+        TokenType currTokenType, opTokenType;
         boolean stop;
         int precedCmp;
 
-        for (Node currNode : nodes) {
+        for (TokenNode currNode : nodes) {
             currToken = currNode.getToken();
             currTokenType = currToken.getType();
             // The token is an operand so push it directly to the postfix list
@@ -242,19 +241,19 @@ public class ExpressionParser {
      * @param postfixNodes a list of nodes in postfix order.
      * @return the root node of the AST.
      */
-    private Node buildASTFromPostFix(ArrayList<Node> postfixNodes) {
+    private Node buildASTFromPostFix(ArrayList<TokenNode> postfixNodes) {
         // If the postfix list is empty, immediately return null
         if (postfixNodes.isEmpty()) {
             return null;
         }
 
-        ArrayDeque<Node> tempStack = new ArrayDeque<>();
+        ArrayDeque<TokenNode> tempStack = new ArrayDeque<>();
         Token currToken;
         TokenType currTokenType;
-        Node operandNode1;
-        Node operandNode2;
+        TokenNode operandNode1;
+        TokenNode operandNode2;
 
-        for (Node currNode : postfixNodes) {
+        for (TokenNode currNode : postfixNodes) {
             currToken = currNode.getToken();
             currTokenType = currToken.getType();
             if (currTokenType == TokenType.ID || currTokenType == TokenType.NUM) {
@@ -280,7 +279,9 @@ public class ExpressionParser {
         }
 
         // If everything works correctly and postfix list is not empty, the temp stack should have one last node
-        // that is the root of the AST
-        return tempStack.removeLast();
+        TokenNode exprRoot = tempStack.removeLast();
+        Node astRoot = new Node(NodeType.EXPR);
+        astRoot.addChild(exprRoot);
+        return astRoot;
     }
 }

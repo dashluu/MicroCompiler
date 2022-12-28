@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ExpressionParserTest {
 
-    private ArrayList<Node> getExpressionInfixNodesHelper(String inputStr, Block scope)
+    private ArrayList<TokenNode> getExpressionInfixNodesHelper(String inputStr, Block scope)
             throws SyntaxError, IOException {
         BufferedReader reader = new BufferedReader(new StringReader(inputStr));
         Lexer lexer = new Lexer(reader);
@@ -31,27 +31,27 @@ class ExpressionParserTest {
     @Test
     void testGetExpressionInfixNodesValid1() {
         String inputStr = "    a+a  *(-2.e-1+--(75))\t";
-        ArrayList<Node> expectedInfixNodes = new ArrayList<>();
-        expectedInfixNodes.add(new Node(new Token("a", TokenType.ID)));
-        expectedInfixNodes.add(new Node(new Token("+", TokenType.ADD)));
-        expectedInfixNodes.add(new Node(new Token("a", TokenType.ID)));
-        expectedInfixNodes.add(new Node(new Token("*", TokenType.MULT)));
-        expectedInfixNodes.add(new Node(new Token("(", TokenType.LPAREN)));
-        expectedInfixNodes.add(new Node(new Token("-", TokenType.MINUS)));
-        expectedInfixNodes.add(new Node(new Token("2.0e-1", TokenType.NUM)));
-        expectedInfixNodes.add(new Node(new Token("+", TokenType.ADD)));
-        expectedInfixNodes.add(new Node(new Token("-", TokenType.MINUS)));
-        expectedInfixNodes.add(new Node(new Token("-", TokenType.MINUS)));
-        expectedInfixNodes.add(new Node(new Token("(", TokenType.LPAREN)));
-        expectedInfixNodes.add(new Node(new Token("75", TokenType.NUM)));
-        expectedInfixNodes.add(new Node(new Token(")", TokenType.RPAREN)));
-        expectedInfixNodes.add(new Node(new Token(")", TokenType.RPAREN)));
+        ArrayList<TokenNode> expectedInfixNodes = new ArrayList<>();
+        expectedInfixNodes.add(new TokenNode(new Token("a", TokenType.ID)));
+        expectedInfixNodes.add(new TokenNode(new Token("+", TokenType.ADD)));
+        expectedInfixNodes.add(new TokenNode(new Token("a", TokenType.ID)));
+        expectedInfixNodes.add(new TokenNode(new Token("*", TokenType.MULT)));
+        expectedInfixNodes.add(new TokenNode(new Token("(", TokenType.LPAREN)));
+        expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
+        expectedInfixNodes.add(new TokenNode(new Token("2.0e-1", TokenType.NUM)));
+        expectedInfixNodes.add(new TokenNode(new Token("+", TokenType.ADD)));
+        expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
+        expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
+        expectedInfixNodes.add(new TokenNode(new Token("(", TokenType.LPAREN)));
+        expectedInfixNodes.add(new TokenNode(new Token("75", TokenType.NUM)));
+        expectedInfixNodes.add(new TokenNode(new Token(")", TokenType.RPAREN)));
+        expectedInfixNodes.add(new TokenNode(new Token(")", TokenType.RPAREN)));
 
         // Set up the symbol table
         SymbolTable.getInstance().set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope));
 
         try {
-            ArrayList<Node> actualInfixNodes = getExpressionInfixNodesHelper(inputStr, Global.globalScope);
+            ArrayList<TokenNode> actualInfixNodes = getExpressionInfixNodesHelper(inputStr, Global.globalScope);
             assertEquals(expectedInfixNodes, actualInfixNodes);
         } catch (SyntaxError | IOException e) {
             e.printStackTrace();
