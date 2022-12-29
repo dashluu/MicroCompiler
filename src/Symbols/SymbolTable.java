@@ -85,7 +85,7 @@ public class SymbolTable {
      */
     public SymbolInfo getID(String keyStr, Block scope) {
         Token dummyToken = new Token(keyStr);
-        IDInfo dummyInfo = new IDInfo(dummyToken, scope, true);
+        IDInfo dummyInfo = new IDInfo(dummyToken, scope, null, true);
         return get(dummyInfo);
     }
 

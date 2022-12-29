@@ -3,6 +3,7 @@ import LexerSpace.Lexer;
 import ParserSpace.ExpressionParser;
 import Symbols.IDInfo;
 import Symbols.SymbolTable;
+import Symbols.TypeInfo;
 import Utilities.Global;
 import Utilities.Token;
 import Utilities.TokenType;
@@ -17,7 +18,9 @@ public class Main {
         BufferedReader reader = new BufferedReader(new StringReader(str));
         Lexer lexer = new Lexer(reader);
         ExpressionParser expressionParser = new ExpressionParser(lexer);
-        SymbolTable.getInstance().set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope, true));
+        SymbolTable symbolTable = SymbolTable.getInstance();
+        TypeInfo type = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
+        symbolTable.set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope, type, true));
         expressionParser.parseExpression(Global.globalScope);
     }
 }

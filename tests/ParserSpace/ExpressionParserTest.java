@@ -4,6 +4,7 @@ import Exceptions.SyntaxError;
 import LexerSpace.Lexer;
 import Symbols.IDInfo;
 import Symbols.SymbolTable;
+import Symbols.TypeInfo;
 import Utilities.*;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +45,9 @@ class ExpressionParserTest {
         expectedInfixNodes.add(new TokenNode(new Token(")", TokenType.RPAREN)));
 
         // Set up the symbol table
-        SymbolTable.getInstance().set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope, true));
+        SymbolTable symbolTable = SymbolTable.getInstance();
+        TypeInfo type = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
+        symbolTable.set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope, type, true));
 
         try {
             ArrayList<TokenNode> actualInfixNodes = getExpressionInfixNodesHelper(inputStr, Global.globalScope);

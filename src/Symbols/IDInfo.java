@@ -6,16 +6,22 @@ import Utilities.Token;
 public class IDInfo extends SymbolInfo {
 
     private final Block scope;
+    private final TypeInfo type;
     private final boolean mutable;
 
-    public IDInfo(Token token, Block scope, boolean mutable) {
+    public IDInfo(Token token, Block scope, TypeInfo type, boolean mutable) {
         super(token, SymbolType.ID);
         this.scope = scope;
+        this.type = type;
         this.mutable = mutable;
     }
 
     public Block getScope() {
         return scope;
+    }
+
+    public TypeInfo getType() {
+        return type;
     }
 
     public boolean isMutable() {
