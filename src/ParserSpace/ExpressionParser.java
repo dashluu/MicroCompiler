@@ -279,9 +279,8 @@ public class ExpressionParser {
         }
 
         // If everything works correctly and postfix list is not empty, the temp stack should have one last node
-        TokenNode exprRoot = tempStack.removeLast();
-        Node astRoot = new Node(NodeType.EXPR);
-        astRoot.addChild(exprRoot);
-        return astRoot;
+        Node exprRoot = new Node(NodeType.EXPR);
+        exprRoot.addChild(tempStack.removeLast());
+        return exprRoot;
     }
 }
