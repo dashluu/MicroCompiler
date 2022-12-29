@@ -283,7 +283,7 @@ public class Lexer {
             return null;
         }
 
-        return new Token(tokenStr.toString(), TokenType.NUM);
+        return new Token(tokenStr.toString(), TokenType.INT);
     }
 
     /**
@@ -330,7 +330,8 @@ public class Lexer {
             }
         }
 
-        return new Token(tokenStr.toString(), TokenType.NUM);
+        TokenType tokenType = missingDecPoint ? TokenType.INT : TokenType.FLOAT;
+        return new Token(tokenStr.toString(), tokenType);
     }
 
     /**
@@ -352,6 +353,7 @@ public class Lexer {
         short c;
         StringBuilder tokenStr = new StringBuilder();
         StringBuilder tempStr = new StringBuilder();
+        TokenType tokenType = tempToken.getType();
 
         tokenStr.append(tempToken.getValue());
         // Get 'e'
@@ -360,7 +362,7 @@ public class Lexer {
             // Put back what has been read
             buffer.putBack(tempStr.toString());
             if ((c = buffer.peek()) == EOS || isSpace(c) || isSpecialChar(c) && c != '.') {
-                return new Token(tokenStr.toString(), TokenType.NUM);
+                return new Token(tokenStr.toString(), tokenType);
             } else {
                 throw new SyntaxError("Invalid numeric expression after '" + tokenStr + "'", getCurrLine());
             }
@@ -384,12 +386,12 @@ public class Lexer {
             tokenStr.append(tempToken.getValue());
         }
 
-        // Get the power
+        // Get the exponent
         tempToken = getNumberToken();
         if (tempToken == null) {
             throw new SyntaxError("Invalid numeric expression after '" + tokenStr + "'", getCurrLine());
         }
         tokenStr.append(tempToken.getValue());
-        return new Token(tokenStr.toString(), TokenType.NUM);
+        return new Token(tokenStr.toString(), TokenType.FLOAT);
     }
 }

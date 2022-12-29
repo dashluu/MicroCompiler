@@ -3,8 +3,12 @@ package ParserSpace;
 import Exceptions.SyntaxError;
 import LexerSpace.Lexer;
 import Operators.OperatorTable;
+import Symbols.IDInfo;
+import Symbols.SymbolInfo;
 import Symbols.SymbolTable;
+import Symbols.TypeInfo;
 import Utilities.Block;
+import Utilities.Global;
 import Utilities.Token;
 import Utilities.TokenType;
 
@@ -99,20 +103,30 @@ public class ExpressionParser {
         boolean isOpBinary = opTable.isOperator(currTokenType) && opTable.isOperatorBinary(currTokenType);
 
         // Check if the expression starts with '(', a binary operator, an ID, or a number
-        if (currTokenType != TokenType.LPAREN && !isOpBinary &&
-                currTokenType != TokenType.ID && currTokenType != TokenType.NUM) {
+        if (currTokenType != TokenType.LPAREN && !isOpBinary && currTokenType != TokenType.ID &&
+                currTokenType != TokenType.INT && currTokenType != TokenType.FLOAT) {
             throw new SyntaxError("Invalid expression syntax at '" + currTokenStr + "'", lexer.getCurrLine());
         }
 
+        TypeInfo currTokenDataType;
+
         if (currTokenType == TokenType.ID) {
             // Check if the token is a valid ID
-            if (!symbolTable.isID(currTokenStr, scope)) {
+            IDInfo idInfo = (IDInfo) symbolTable.getID(currTokenStr, scope);
+            if (idInfo == null) {
                 throw new SyntaxError("Invalid variable '" + currTokenStr + "'", lexer.getCurrLine());
             }
-            nodes.add(new TokenNode(currToken));
-        } else if (currTokenType == TokenType.NUM) {
-            // Consume a number
-            nodes.add(new TokenNode(currToken));
+            // Get the ID's data type
+            currTokenDataType = idInfo.getType();
+            nodes.add(new TokenNode(currToken, currTokenDataType));
+        } else if (currTokenType == TokenType.INT) {
+            // Consume an integer
+            currTokenDataType = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
+            nodes.add(new TokenNode(currToken, currTokenDataType));
+        } else if (currTokenType == TokenType.FLOAT) {
+            // Consume a floating point
+            currTokenDataType = (TypeInfo) symbolTable.getType(Global.FLOAT_TYPE_ID);
+            nodes.add(new TokenNode(currToken, currTokenDataType));
         } else if (isOpBinary) {
             // Try to map the binary operator to a unary operator since a token can be both a binary or a unary operator
             // For example, '+' and '-'
@@ -191,7 +205,7 @@ public class ExpressionParser {
             currToken = currNode.getToken();
             currTokenType = currToken.getType();
             // The token is an operand so push it directly to the postfix list
-            if (currTokenType == TokenType.ID || currTokenType == TokenType.NUM) {
+            if (currTokenType == TokenType.ID || currTokenType == TokenType.INT || currTokenType == TokenType.FLOAT) {
                 postfixNodes.add(currNode);
             } else if (currTokenType == TokenType.LPAREN) {
                 opStack.add(currNode);
@@ -256,7 +270,7 @@ public class ExpressionParser {
         for (TokenNode currNode : postfixNodes) {
             currToken = currNode.getToken();
             currTokenType = currToken.getType();
-            if (currTokenType == TokenType.ID || currTokenType == TokenType.NUM) {
+            if (currTokenType == TokenType.ID || currTokenType == TokenType.INT || currTokenType == TokenType.FLOAT) {
                 // Push the operand onto the temp stack
                 tempStack.add(currNode);
             } else if (OperatorTable.getInstance().isOperatorUnary(currTokenType)) {

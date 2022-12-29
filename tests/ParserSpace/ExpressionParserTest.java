@@ -35,12 +35,12 @@ class ExpressionParserTest {
         expectedInfixNodes.add(new TokenNode(new Token("*", TokenType.MULT)));
         expectedInfixNodes.add(new TokenNode(new Token("(", TokenType.LPAREN)));
         expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
-        expectedInfixNodes.add(new TokenNode(new Token("2.0e-1", TokenType.NUM)));
+        expectedInfixNodes.add(new TokenNode(new Token("2.0e-1", TokenType.FLOAT)));
         expectedInfixNodes.add(new TokenNode(new Token("+", TokenType.ADD)));
         expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
         expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
         expectedInfixNodes.add(new TokenNode(new Token("(", TokenType.LPAREN)));
-        expectedInfixNodes.add(new TokenNode(new Token("75", TokenType.NUM)));
+        expectedInfixNodes.add(new TokenNode(new Token("75", TokenType.INT)));
         expectedInfixNodes.add(new TokenNode(new Token(")", TokenType.RPAREN)));
         expectedInfixNodes.add(new TokenNode(new Token(")", TokenType.RPAREN)));
 
