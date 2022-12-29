@@ -17,7 +17,7 @@ public class Main {
         BufferedReader reader = new BufferedReader(new StringReader(str));
         Lexer lexer = new Lexer(reader);
         ExpressionParser expressionParser = new ExpressionParser(lexer);
-        SymbolTable.getInstance().set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope));
+        SymbolTable.getInstance().set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope, true));
         expressionParser.parseExpression(Global.globalScope);
     }
 }

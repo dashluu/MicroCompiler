@@ -25,10 +25,6 @@ class ExpressionParserTest {
     }
 
     @Test
-    void parseExpression() {
-    }
-
-    @Test
     void testGetExpressionInfixNodesValid1() {
         String inputStr = "    a+a  *(-2.e-1+--(75))\t";
         ArrayList<TokenNode> expectedInfixNodes = new ArrayList<>();
@@ -48,7 +44,7 @@ class ExpressionParserTest {
         expectedInfixNodes.add(new TokenNode(new Token(")", TokenType.RPAREN)));
 
         // Set up the symbol table
-        SymbolTable.getInstance().set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope));
+        SymbolTable.getInstance().set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope, true));
 
         try {
             ArrayList<TokenNode> actualInfixNodes = getExpressionInfixNodesHelper(inputStr, Global.globalScope);
