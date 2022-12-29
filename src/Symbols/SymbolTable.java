@@ -24,7 +24,7 @@ public class SymbolTable {
         if (!init) {
             // Initialize the symbol table
             symbolTable = new SymbolTable();
-            symbolTable.set(new KeywordInfo(new Token(Global.ID_DECL, TokenType.ID_DECL)));
+            symbolTable.set(new KeywordInfo(new Token(Global.MUTABLE_ID_DECL, TokenType.MUTABLE_ID_DECL)));
             symbolTable.set(new TypeInfo(new Token(Global.INT_TYPE_ID, TokenType.INT_TYPE)));
             symbolTable.set(new TypeInfo(new Token(Global.FLOAT_TYPE_ID, TokenType.FLOAT_TYPE)));
             symbolTable.set(new OperatorInfo(new Token("+", TokenType.ADD)));
@@ -85,7 +85,7 @@ public class SymbolTable {
      */
     public SymbolInfo getID(String keyStr, Block scope) {
         Token dummyToken = new Token(keyStr);
-        IDInfo dummyInfo = new IDInfo(dummyToken, scope);
+        IDInfo dummyInfo = new IDInfo(dummyToken, scope, true);
         return get(dummyInfo);
     }
 

@@ -59,7 +59,7 @@ class LexerTest {
     public void testLexerValid2() {
         String inputStr = "  var b=b +\t-.e+.5 *  a/a  *((2.e-1-67.+71e3*21)))\t";
         ArrayList<Token> expectedTokens = new ArrayList<>();
-        expectedTokens.add(new Token("var", TokenType.ID_DECL));
+        expectedTokens.add(new Token("var", TokenType.MUTABLE_ID_DECL));
         expectedTokens.add(new Token("b", TokenType.ID));
         expectedTokens.add(new Token("=", TokenType.ASSIGNMENT));
         expectedTokens.add(new Token("b", TokenType.ID));

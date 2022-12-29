@@ -1,7 +1,7 @@
 package Utilities;
 
 public class Global {
-    public static String ID_DECL = "var";
+    public static String MUTABLE_ID_DECL = "var";
     public static String INT_TYPE_ID = "int";
     public static String FLOAT_TYPE_ID = "float";
 
