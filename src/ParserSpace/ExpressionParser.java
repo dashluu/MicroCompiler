@@ -191,7 +191,7 @@ public class ExpressionParser {
      * @param nodes list of input nodes.
      * @return a list of nodes in postfix order.
      */
-    private ArrayList<TokenNode> getPostfixOrder(ArrayList<TokenNode> nodes) {
+    public ArrayList<TokenNode> getPostfixOrder(ArrayList<TokenNode> nodes) {
         OperatorTable opTable = OperatorTable.getInstance();
         ArrayList<TokenNode> postfixNodes = new ArrayList<>();
         ArrayDeque<TokenNode> opStack = new ArrayDeque<>();
@@ -255,7 +255,7 @@ public class ExpressionParser {
      * @param postfixNodes a list of nodes in postfix order.
      * @return the root node of the AST.
      */
-    private Node buildASTFromPostFix(ArrayList<TokenNode> postfixNodes) {
+    public Node buildASTFromPostFix(ArrayList<TokenNode> postfixNodes) {
         // If the postfix list is empty, immediately return null
         if (postfixNodes.isEmpty()) {
             return null;
