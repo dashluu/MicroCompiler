@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 public class SymbolTable {
     private final HashMap<SymbolInfo, SymbolInfo> symbols = new HashMap<>();
-    private static SymbolTable symbolTable;
+    private static final SymbolTable symbolTable = new SymbolTable();
     private static boolean init = false;
 
     private SymbolTable() {
@@ -23,7 +23,6 @@ public class SymbolTable {
     public static SymbolTable getInstance() {
         if (!init) {
             // Initialize the symbol table
-            symbolTable = new SymbolTable();
             symbolTable.set(new KeywordInfo(new Token(Global.MUTABLE_ID_DECL, TokenType.MUTABLE_ID_DECL)));
             symbolTable.set(new TypeInfo(new Token(Global.INT_TYPE_ID, TokenType.INT_TYPE)));
             symbolTable.set(new TypeInfo(new Token(Global.FLOAT_TYPE_ID, TokenType.FLOAT_TYPE)));

@@ -44,6 +44,6 @@ public class Operator {
         if (!(obj instanceof Operator op)) {
             return false;
         }
-        return id.equals(op.id);
+        return id == op.id;
     }
 }

@@ -7,7 +7,7 @@ import java.util.HashMap;
 public class OperatorTable {
     private final HashMap<TokenType, Operator> operators = new HashMap<>();
     private final HashMap<TokenType, TokenType> binaryToUnaryOps = new HashMap<>();
-    private static OperatorTable opTable;
+    private static final OperatorTable opTable = new OperatorTable();
     private static boolean init = false;
 
     private OperatorTable() {
@@ -21,7 +21,6 @@ public class OperatorTable {
     public static OperatorTable getInstance() {
         if (!init) {
             // Initialize the operator table
-            opTable = new OperatorTable();
             opTable.set(new Operator(TokenType.ADD, 0, true, Operator.OperatorType.BINARY));
             opTable.set(new Operator(TokenType.SUB, 0, true, Operator.OperatorType.BINARY));
             opTable.set(new Operator(TokenType.PLUS, 2, false, Operator.OperatorType.UNARY));
