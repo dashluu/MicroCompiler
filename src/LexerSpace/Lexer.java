@@ -8,43 +8,16 @@ import Utilities.TokenType;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayDeque;
 
 public class Lexer {
-    private static class Buffer {
-        public final StringBuilder mainBuffer = new StringBuilder();
-        public final BufferedReader reader;
-        public int currLine = 1;
-
-        public Buffer(BufferedReader reader) {
-            this.reader = reader;
-        }
-
-        public short peek() throws IOException {
-            if (mainBuffer.isEmpty()) {
-                mainBuffer.append((char) reader.read());
-            }
-            return (short) mainBuffer.charAt(0);
-        }
-
-        public short read() throws IOException {
-            short c = peek();
-            mainBuffer.deleteCharAt(0);
-            return c;
-        }
-
-        public void putBack(String str) {
-            if (str != null && !str.isEmpty()) {
-                mainBuffer.insert(0, str);
-            }
-        }
-    }
-
-    private final Buffer buffer;
+    private final CharBuffer charBuffer;
+    private final ArrayDeque<Token> tokenBuffer = new ArrayDeque<>();
     private final static String SPECIAL_CHARS = "()+-*/&|%<>=,.;:_";
     private final static int EOS = -1;
 
     public Lexer(BufferedReader reader) {
-        this.buffer = new Buffer(reader);
+        this.charBuffer = new CharBuffer(reader);
     }
 
     /**
@@ -53,11 +26,17 @@ public class Lexer {
      * @return the current line in the stream.
      */
     public int getCurrLine() {
-        return buffer.currLine;
+        return charBuffer.currLine;
     }
 
-    public void putBack(String str) {
-        buffer.putBack(str);
+    public void putBack(Token token) {
+        tokenBuffer.addFirst(token);
+    }
+
+    public void putBack(ArrayDeque<Token> aTokenBuffer) {
+        while (!aTokenBuffer.isEmpty()) {
+            tokenBuffer.addFirst(aTokenBuffer.removeLast());
+        }
     }
 
     /**
@@ -67,8 +46,8 @@ public class Lexer {
      */
     private void skipSpaces() throws IOException {
         short c;
-        while ((c = buffer.peek()) != EOS && isSpace(c)) {
-            buffer.read();
+        while ((c = charBuffer.peek()) != EOS && isSpace(c)) {
+            charBuffer.read();
         }
     }
 
@@ -120,9 +99,13 @@ public class Lexer {
      * @throws IOException if the read operation causes an IO error.
      */
     public Token getNextToken() throws SyntaxError, IOException {
-        skipSpaces();
+        // Reads from the token buffer before extracting characters from the stream
+        if (!tokenBuffer.isEmpty()) {
+            return tokenBuffer.removeFirst();
+        }
 
-        if (buffer.peek() == EOS) {
+        skipSpaces();
+        if (charBuffer.peek() == EOS) {
             return null;
         }
 
@@ -174,7 +157,7 @@ public class Lexer {
         short c;
 
         // Check if the first character is end of stream or a letter or '_'
-        if ((c = buffer.peek()) == EOS || (!Character.isAlphabetic(c) && c != '_')) {
+        if ((c = charBuffer.peek()) == EOS || (!Character.isAlphabetic(c) && c != '_')) {
             return null;
         }
 
@@ -185,13 +168,13 @@ public class Lexer {
         while (!isSeparator(c) && !end) {
             if (isAlnumUnderscore(c)) {
                 tokenStr.append((char) c);
-                buffer.read();
+                charBuffer.read();
             } else if (isSpecialChar(c)) {
                 end = true;
             } else {
                 throw new SyntaxError("Invalid character '" + c + "' after '" + tokenStr + "'", getCurrLine());
             }
-            c = buffer.peek();
+            c = charBuffer.peek();
         }
 
         // The string cannot be empty
@@ -203,26 +186,26 @@ public class Lexer {
      * Reads a string and stores it in a new token if it matches the given string.
      *
      * @param strToMatch    the string to match.
-     * @param readStrBuffer a string that has been read.
+     * @param readStrBuffer a buffer that stores the characters that have been read when this method runs.
      * @param tokenType     the type of the token to assign if one is present.
      * @return a token containing the string if the operation succeeds and null otherwise.
      * @throws IOException if there is an error while reading.
      */
     private Token getStrToken(String strToMatch, StringBuilder readStrBuffer, TokenType tokenType)
             throws IOException {
-        // Clears the buffer
+        // Clears the charBuffer
         readStrBuffer.setLength(0);
 
         short c;
         int i = 0;
         boolean end = false;
 
-        while (i < strToMatch.length() && (c = buffer.peek()) != EOS && !end) {
+        while (i < strToMatch.length() && (c = charBuffer.peek()) != EOS && !end) {
             end = (char) c != strToMatch.charAt(i);
             if (!end) {
                 readStrBuffer.append((char) c);
                 ++i;
-                buffer.read();
+                charBuffer.read();
             }
         }
 
@@ -246,13 +229,13 @@ public class Lexer {
         String tempStr;
         boolean end = false;
 
-        while ((c = buffer.peek()) != EOS && !end) {
+        while ((c = charBuffer.peek()) != EOS && !end) {
             tempStr = tokenStr.toString() + (char) c;
             // Find the operator corresponding to the string
             end = !SymbolTable.getInstance().isOperator(tempStr);
             if (!end) {
                 tokenStr.append((char) c);
-                buffer.read();
+                charBuffer.read();
             }
         }
 
@@ -274,9 +257,9 @@ public class Lexer {
         short c;
         StringBuilder tokenStr = new StringBuilder();
 
-        while ((c = buffer.peek()) != EOS && Character.isDigit(c)) {
+        while ((c = charBuffer.peek()) != EOS && Character.isDigit(c)) {
             tokenStr.append((char) c);
-            buffer.read();
+            charBuffer.read();
         }
 
         if (tokenStr.isEmpty()) {
@@ -313,7 +296,7 @@ public class Lexer {
             tokenStr.append(".");
         } else {
             // Put back what has been read
-            buffer.putBack(tempStr.toString());
+            charBuffer.putBack(tempStr.toString());
         }
 
         if (missingInt && missingDecPoint) {
@@ -360,8 +343,8 @@ public class Lexer {
         tempToken = getStrToken("e", tempStr, TokenType.UNKNOWN);
         if (tempToken == null) {
             // Put back what has been read
-            buffer.putBack(tempStr.toString());
-            if ((c = buffer.peek()) == EOS || isSpace(c) || isSpecialChar(c) && c != '.') {
+            charBuffer.putBack(tempStr.toString());
+            if ((c = charBuffer.peek()) == EOS || isSpace(c) || isSpecialChar(c) && c != '.') {
                 return new Token(tokenStr.toString(), tokenType);
             } else {
                 throw new SyntaxError("Invalid numeric expression after '" + tokenStr + "'", getCurrLine());
@@ -373,12 +356,12 @@ public class Lexer {
         tempToken = getStrToken("+", tempStr, TokenType.UNKNOWN);
         if (tempToken == null) {
             // Put back what has been read
-            buffer.putBack(tempStr.toString());
+            charBuffer.putBack(tempStr.toString());
             // Reads '-' if '+' is not present
             tempToken = getStrToken("-", tempStr, TokenType.UNKNOWN);
             if (tempToken == null) {
                 // Put back what has been read
-                buffer.putBack(tempStr.toString());
+                charBuffer.putBack(tempStr.toString());
             } else {
                 tokenStr.append(tempToken.getValue());
             }

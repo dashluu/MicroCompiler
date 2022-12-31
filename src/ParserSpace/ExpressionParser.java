@@ -167,7 +167,7 @@ public class ExpressionParser {
         if (currTokenType == TokenType.RPAREN) {
             // Check if ')' is redundant
             if (numParen > 0) {
-                lexer.putBack(currTokenStr + " ");
+                lexer.putBack(currToken);
                 return;
             } else {
                 throw new SyntaxError("Redundant ')'", lexer.getCurrLine());

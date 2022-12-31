@@ -9,6 +9,7 @@ import Utilities.Token;
 import Utilities.TokenType;
 
 import java.io.IOException;
+import java.util.ArrayDeque;
 
 public class StatementParser {
 
@@ -45,11 +46,10 @@ public class StatementParser {
             return null;
         }
 
-        String currTokenStr = currToken.getValue();
         TokenType currTokenType = currToken.getType();
         // Check if the first token is an ID declaration keyword
         if (currTokenType != TokenType.MUTABLE_ID_DECL) {
-            lexer.putBack(currTokenStr + " ");
+            lexer.putBack(currToken);
             return null;
         }
 
@@ -60,7 +60,7 @@ public class StatementParser {
         }
 
         SymbolTable symbolTable = SymbolTable.getInstance();
-        currTokenStr = currToken.getValue();
+        String currTokenStr = currToken.getValue();
         // Check if the ID is valid
         if (symbolTable.isID(currTokenStr, scope)) {
             throw new SyntaxError("Cannot redeclare an existing variable", lexer.getCurrLine());
@@ -127,6 +127,8 @@ public class StatementParser {
         Expression;
          */
 
+        ArrayDeque<Token> tempTokenBuffer = new ArrayDeque<>();
+
         // Try parsing ID declaration
         // var ID: type = ...;
         Node assignmentRoot = parseIDDeclaration(scope);
@@ -143,10 +145,10 @@ public class StatementParser {
 
         String currTokenStr = currToken.getValue();
         SymbolTable symbolTable = SymbolTable.getInstance();
-        String putBackStr = currTokenStr + " ";
+        tempTokenBuffer.addLast(currToken);
         // Check if token is an existing ID
         if (!symbolTable.isID(currTokenStr, scope)) {
-            lexer.putBack(putBackStr);
+            lexer.putBack(tempTokenBuffer);
             return null;
         }
 
@@ -157,12 +159,11 @@ public class StatementParser {
             throw new SyntaxError("Expected an assignment or a valid expression", lexer.getCurrLine());
         }
 
-        currTokenStr = currToken.getValue();
         TokenType currTokenType = currToken.getType();
-        putBackStr += currTokenStr + " ";
+        tempTokenBuffer.addLast(currToken);
         // If the token is not '=', put back everything that has been read and return
         if (currTokenType != TokenType.ASSIGNMENT) {
-            lexer.putBack(putBackStr);
+            lexer.putBack(tempTokenBuffer);
             return null;
         }
 
