@@ -37,10 +37,9 @@ public class TokenNode extends Node {
 
     @Override
     public boolean equals(Object obj) {
-        if (!super.equals(obj)) {
+        if (!super.equals(obj) || !(obj instanceof TokenNode tokenNode)) {
             return false;
         }
-        TokenNode tokenNode = (TokenNode) obj;
         return token.equals(tokenNode.token);
     }
 

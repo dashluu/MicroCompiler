@@ -36,10 +36,9 @@ public class IDInfo extends SymbolInfo {
 
     @Override
     public boolean equals(Object obj) {
-        if (!super.equals(obj)) {
+        if (!super.equals(obj) || !(obj instanceof IDInfo info)) {
             return false;
         }
-        IDInfo info = (IDInfo) obj;
         return scope.equals(info.getScope());
     }
 }
