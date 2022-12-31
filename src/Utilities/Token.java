@@ -4,14 +4,20 @@ public class Token {
 
     private final String value;
     private TokenType tokenType;
+    private final int lineNumber;
 
-    public Token(String value, TokenType tokenType) {
+    public Token(String value, TokenType tokenType, int lineNumber) {
         this.value = value;
         this.tokenType = tokenType;
+        this.lineNumber = lineNumber;
+    }
+
+    public Token(String value, TokenType tokenType) {
+        this(value, tokenType, 1);
     }
 
     public Token(String value) {
-        this(value, TokenType.UNKNOWN);
+        this(value, TokenType.UNKNOWN, 1);
     }
 
     public String getValue() {
@@ -20,6 +26,10 @@ public class Token {
 
     public TokenType getType() {
         return tokenType;
+    }
+
+    public int getLineNumber() {
+        return lineNumber;
     }
 
     public void setType(TokenType tokenType) {

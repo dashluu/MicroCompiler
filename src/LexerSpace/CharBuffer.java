@@ -6,7 +6,6 @@ import java.io.IOException;
 class CharBuffer {
     public final StringBuilder buffer = new StringBuilder();
     public final BufferedReader reader;
-    public int currLine = 1;
 
     public CharBuffer(BufferedReader reader) {
         this.reader = reader;

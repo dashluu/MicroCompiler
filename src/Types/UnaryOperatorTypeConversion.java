@@ -18,7 +18,7 @@ public class UnaryOperatorTypeConversion extends OperatorTypeConversion {
 
     @Override
     public int hashCode() {
-        String hashStr = opId.name() + targetType.getToken().getType().name();
+        String hashStr = opId.name() + targetType.getId();
         return hashStr.hashCode();
     }
 
@@ -27,7 +27,7 @@ public class UnaryOperatorTypeConversion extends OperatorTypeConversion {
         if (!super.equals(obj) || !(obj instanceof UnaryOperatorTypeConversion unOpTypeConversion)) {
             return false;
         }
-        return targetType.equals(unOpTypeConversion.targetType);
+        return targetType == unOpTypeConversion.targetType;
     }
 
 }

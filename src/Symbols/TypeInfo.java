@@ -1,10 +1,9 @@
 package Symbols;
 
-import Utilities.Token;
+import Utilities.TokenType;
 
 public class TypeInfo extends SymbolInfo {
-
-    public TypeInfo(Token token) {
-        super(token, SymbolType.TYPE);
+    public TypeInfo(String id, TokenType idType) {
+        super(id, idType, SymbolType.TYPE);
     }
 }

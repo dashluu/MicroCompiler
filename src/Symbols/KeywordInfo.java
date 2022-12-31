@@ -1,9 +1,9 @@
 package Symbols;
 
-import Utilities.Token;
+import Utilities.TokenType;
 
 public class KeywordInfo extends SymbolInfo {
-    public KeywordInfo(Token token) {
-        super(token, SymbolType.KEYWORD);
+    public KeywordInfo(String id, TokenType idType) {
+        super(id, idType, SymbolType.KEYWORD);
     }
 }

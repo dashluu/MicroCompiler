@@ -33,7 +33,7 @@ public class TypeConversion {
 
     @Override
     public int hashCode() {
-        String hashStr = leftType.getToken().getType().name() + rightType.getToken().getType().name();
+        String hashStr = leftType.getId() + rightType.getId();
         return hashStr.hashCode();
     }
 
@@ -45,6 +45,6 @@ public class TypeConversion {
         if (!(obj instanceof TypeConversion typeConversion)) {
             return false;
         }
-        return leftType.equals(typeConversion.leftType) && rightType.equals(typeConversion.rightType);
+        return leftType == typeConversion.leftType && rightType == typeConversion.rightType;
     }
 }

@@ -15,6 +15,7 @@ public class Lexer {
     private final ArrayDeque<Token> tokenBuffer = new ArrayDeque<>();
     private final static String SPECIAL_CHARS = "()+-*/&|%<>=,.;:_";
     private final static int EOS = -1;
+    private int currLine = 1;
 
     public Lexer(BufferedReader reader) {
         this.charBuffer = new CharBuffer(reader);
@@ -25,17 +26,21 @@ public class Lexer {
      *
      * @return the current line in the stream.
      */
-    public int getCurrLine() {
-        return charBuffer.currLine;
+    public int getCurrentLine() {
+        return currLine;
     }
 
     public void putBack(Token token) {
         tokenBuffer.addFirst(token);
+        currLine = token.getLineNumber();
     }
 
     public void putBack(ArrayDeque<Token> aTokenBuffer) {
+        Token token;
         while (!aTokenBuffer.isEmpty()) {
-            tokenBuffer.addFirst(aTokenBuffer.removeLast());
+            token = aTokenBuffer.removeLast();
+            tokenBuffer.addFirst(token);
+            currLine = token.getLineNumber();
         }
     }
 
@@ -47,6 +52,9 @@ public class Lexer {
     private void skipSpaces() throws IOException {
         short c;
         while ((c = charBuffer.peek()) != EOS && isSpace(c)) {
+            if (c == '\n') {
+                ++currLine;
+            }
             charBuffer.read();
         }
     }
@@ -117,13 +125,13 @@ public class Lexer {
             String tokenStr = token.getValue();
             SymbolInfo info = symbolTable.getKeyword(tokenStr);
             if (info != null) {
-                token.setType(info.getToken().getType());
+                token.setType(info.getIdType());
                 return token;
             }
             // Check if the token is a type id, if it is, change its token type
             info = symbolTable.getType(tokenStr);
             if (info != null) {
-                token.setType(info.getToken().getType());
+                token.setType(info.getIdType());
                 return token;
             }
             // Otherwise, keep it as an ID
@@ -138,12 +146,12 @@ public class Lexer {
             // Get the correct operator type using the symbol table
             SymbolInfo info = symbolTable.getOperator(token.getValue());
             if (info != null) {
-                token.setType(info.getToken().getType());
+                token.setType(info.getIdType());
                 return token;
             }
             return token;
         }
-        throw new SyntaxError("Unable to get next token because of invalid syntax", getCurrLine());
+        throw new SyntaxError("Unable to get next token because of invalid syntax", getCurrentLine());
     }
 
     /**
@@ -172,14 +180,14 @@ public class Lexer {
             } else if (isSpecialChar(c)) {
                 end = true;
             } else {
-                throw new SyntaxError("Invalid character '" + c + "' after '" + tokenStr + "'", getCurrLine());
+                throw new SyntaxError("Invalid character '" + c + "' after '" + tokenStr + "'", getCurrentLine());
             }
             c = charBuffer.peek();
         }
 
         // The string cannot be empty
         // Set the type to ID and check it later
-        return new Token(tokenStr.toString(), TokenType.ID);
+        return new Token(tokenStr.toString(), TokenType.ID, currLine);
     }
 
     /**
@@ -213,7 +221,7 @@ public class Lexer {
             return null;
         }
 
-        return new Token(strToMatch, tokenType);
+        return new Token(strToMatch, tokenType, currLine);
     }
 
     /**
@@ -243,7 +251,7 @@ public class Lexer {
             return null;
         }
 
-        return new Token(tokenStr.toString(), TokenType.UNKNOWN);
+        return new Token(tokenStr.toString(), TokenType.UNKNOWN, currLine);
     }
 
     /**
@@ -266,7 +274,7 @@ public class Lexer {
             return null;
         }
 
-        return new Token(tokenStr.toString(), TokenType.INT);
+        return new Token(tokenStr.toString(), TokenType.INT, currLine);
     }
 
     /**
@@ -314,7 +322,7 @@ public class Lexer {
         }
 
         TokenType tokenType = missingDecPoint ? TokenType.INT : TokenType.FLOAT;
-        return new Token(tokenStr.toString(), tokenType);
+        return new Token(tokenStr.toString(), tokenType, currLine);
     }
 
     /**
@@ -345,9 +353,9 @@ public class Lexer {
             // Put back what has been read
             charBuffer.putBack(tempStr.toString());
             if ((c = charBuffer.peek()) == EOS || isSpace(c) || isSpecialChar(c) && c != '.') {
-                return new Token(tokenStr.toString(), tokenType);
+                return new Token(tokenStr.toString(), tokenType, currLine);
             } else {
-                throw new SyntaxError("Invalid numeric expression after '" + tokenStr + "'", getCurrLine());
+                throw new SyntaxError("Invalid numeric expression after '" + tokenStr + "'", getCurrentLine());
             }
         }
         tokenStr.append("e");
@@ -372,9 +380,9 @@ public class Lexer {
         // Get the exponent
         tempToken = getNumberToken();
         if (tempToken == null) {
-            throw new SyntaxError("Invalid numeric expression after '" + tokenStr + "'", getCurrLine());
+            throw new SyntaxError("Invalid numeric expression after '" + tokenStr + "'", getCurrentLine());
         }
         tokenStr.append(tempToken.getValue());
-        return new Token(tokenStr.toString(), TokenType.FLOAT);
+        return new Token(tokenStr.toString(), TokenType.FLOAT, currLine);
     }
 }

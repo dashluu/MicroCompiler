@@ -1,18 +1,18 @@
 package Symbols;
 
 import Utilities.Block;
-import Utilities.Token;
+import Utilities.TokenType;
 
 public class IDInfo extends SymbolInfo {
 
     private final Block scope;
-    private final TypeInfo type;
+    private final TypeInfo dataType;
     private final boolean mutable;
 
-    public IDInfo(Token token, Block scope, TypeInfo type, boolean mutable) {
-        super(token, SymbolType.ID);
+    public IDInfo(String id, Block scope, TypeInfo dataType, boolean mutable) {
+        super(id, TokenType.ID, SymbolType.ID);
         this.scope = scope;
-        this.type = type;
+        this.dataType = dataType;
         this.mutable = mutable;
     }
 
@@ -20,8 +20,8 @@ public class IDInfo extends SymbolInfo {
         return scope;
     }
 
-    public TypeInfo getType() {
-        return type;
+    public TypeInfo getDataType() {
+        return dataType;
     }
 
     public boolean isMutable() {
@@ -30,7 +30,7 @@ public class IDInfo extends SymbolInfo {
 
     @Override
     public int hashCode() {
-        String hashStr = scope.id() + ":" + token.getValue();
+        String hashStr = scope.id() + ":" + id;
         return hashStr.hashCode();
     }
 

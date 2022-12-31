@@ -73,7 +73,7 @@ public class ExpressionParser {
         // Recursively parse an expression
         recurParseExpression(nodes, scope);
         if (nodes.size() == numNodesBefore) {
-            throw new SyntaxError("Missing a valid expression after '" + str + "'", lexer.getCurrLine());
+            throw new SyntaxError("Missing a valid expression after '" + str + "'", lexer.getCurrentLine());
         }
     }
 
@@ -106,7 +106,7 @@ public class ExpressionParser {
         // Check if the expression starts with '(', a binary operator, an ID, or a number
         if (currTokenType != TokenType.LPAREN && !isOpBinary && currTokenType != TokenType.ID &&
                 currTokenType != TokenType.INT && currTokenType != TokenType.FLOAT) {
-            throw new SyntaxError("Invalid expression syntax at '" + currTokenStr + "'", lexer.getCurrLine());
+            throw new SyntaxError("Invalid expression syntax at '" + currTokenStr + "'", lexer.getCurrentLine());
         }
 
         TypeInfo currTokenDataType;
@@ -115,10 +115,10 @@ public class ExpressionParser {
             // Check if the token is a valid ID
             IDInfo idInfo = (IDInfo) symbolTable.getID(currTokenStr, scope);
             if (idInfo == null) {
-                throw new SyntaxError("Invalid variable '" + currTokenStr + "'", lexer.getCurrLine());
+                throw new SyntaxError("Invalid variable '" + currTokenStr + "'", lexer.getCurrentLine());
             }
             // Get the ID's data type
-            currTokenDataType = idInfo.getType();
+            currTokenDataType = idInfo.getDataType();
             nodes.add(new TokenNode(currToken, currTokenDataType));
         } else if (currTokenType == TokenType.INT) {
             // Consume an integer
@@ -133,7 +133,7 @@ public class ExpressionParser {
             // For example, '+' and '-'
             TokenType unaryOpTokenType = opTable.mapBinaryToUnaryOperator(currTokenType);
             if (unaryOpTokenType == null) {
-                throw new SyntaxError("Invalid unary operator '" + currTokenStr + "'", lexer.getCurrLine());
+                throw new SyntaxError("Invalid unary operator '" + currTokenStr + "'", lexer.getCurrentLine());
             }
             currToken.setType(unaryOpTokenType);
             nodes.add(new TokenNode(currToken));
@@ -148,7 +148,7 @@ public class ExpressionParser {
             // Consume ')' and decrement the number of parentheses
             currToken = lexer.getNextToken();
             if (currToken == null || currToken.getType() != TokenType.RPAREN) {
-                throw new SyntaxError("Missing ')'", lexer.getCurrLine());
+                throw new SyntaxError("Missing ')'", lexer.getCurrentLine());
             }
             nodes.add(new TokenNode(currToken));
             --numParen;
@@ -170,7 +170,7 @@ public class ExpressionParser {
                 lexer.putBack(currToken);
                 return;
             } else {
-                throw new SyntaxError("Redundant ')'", lexer.getCurrLine());
+                throw new SyntaxError("Redundant ')'", lexer.getCurrentLine());
             }
         }
 
@@ -178,7 +178,7 @@ public class ExpressionParser {
         isOpBinary = opTable.isOperator(currTokenType) && opTable.isOperatorBinary(currTokenType);
 
         if (!isOpBinary) {
-            throw new SyntaxError("Invalid binary operator '" + currTokenStr + "'", lexer.getCurrLine());
+            throw new SyntaxError("Invalid binary operator '" + currTokenStr + "'", lexer.getCurrentLine());
         }
         nodes.add(new TokenNode(currToken));
 
@@ -288,9 +288,9 @@ public class ExpressionParser {
                 type1 = operandNode1.getType();
                 typeCompatible = typeTable.IsTypeCompatibleUsingUnaryOperator(currTokenType, type1);
                 if (!typeCompatible) {
-                    throw new SyntaxError("Type '" + type1.getToken().getValue() +
+                    throw new SyntaxError("Type '" + type1.getId() +
                             "' is not compatible with the operator '" + currTokenStr + "'",
-                            lexer.getCurrLine());
+                            lexer.getCurrentLine());
                 }
                 currNode.addChild(operandNode1);
                 currNode.setType(type1);
@@ -306,10 +306,9 @@ public class ExpressionParser {
                 type2 = operandNode2.getType();
                 typeCompatible = typeTable.AreTypesCompatibleUsingBinaryOperator(currTokenType, type1, type2);
                 if (!typeCompatible) {
-                    throw new SyntaxError("Type '" + type1.getToken().getValue() +
-                            "' and type '" + type2.getToken().getValue() +
+                    throw new SyntaxError("Type '" + type1.getId() + "' and type '" + type2.getId() +
                             "' are not compatible using the operator '" + currTokenStr + "'",
-                            lexer.getCurrLine());
+                            lexer.getCurrentLine());
                 }
                 if (type1 != type2) {
                     // If the two types are not the same but compatible with the given operator,

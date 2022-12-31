@@ -2,7 +2,6 @@ package Symbols;
 
 import Utilities.Block;
 import Utilities.Global;
-import Utilities.Token;
 import Utilities.TokenType;
 
 import java.util.HashMap;
@@ -23,19 +22,19 @@ public class SymbolTable {
     public static SymbolTable getInstance() {
         if (!init) {
             // Initialize the symbol table
-            symbolTable.set(new KeywordInfo(new Token(Global.MUTABLE_ID_DECL, TokenType.MUTABLE_ID_DECL)));
-            symbolTable.set(new TypeInfo(new Token(Global.INT_TYPE_ID, TokenType.INT_TYPE)));
-            symbolTable.set(new TypeInfo(new Token(Global.FLOAT_TYPE_ID, TokenType.FLOAT_TYPE)));
-            symbolTable.set(new OperatorInfo(new Token("+", TokenType.ADD)));
-            symbolTable.set(new OperatorInfo(new Token("-", TokenType.SUB)));
-            symbolTable.set(new OperatorInfo(new Token("*", TokenType.MULT)));
-            symbolTable.set(new OperatorInfo(new Token("/", TokenType.DIV)));
-            symbolTable.set(new OperatorInfo(new Token(".", TokenType.DOT)));
-            symbolTable.set(new OperatorInfo(new Token(":", TokenType.COLON)));
-            symbolTable.set(new OperatorInfo(new Token("(", TokenType.LPAREN)));
-            symbolTable.set(new OperatorInfo(new Token(")", TokenType.RPAREN)));
-            symbolTable.set(new OperatorInfo(new Token(";", TokenType.SEMICOLON)));
-            symbolTable.set(new OperatorInfo(new Token("=", TokenType.ASSIGNMENT)));
+            symbolTable.set(new KeywordInfo(Global.MUTABLE_ID_DECL, TokenType.MUTABLE_ID_DECL));
+            symbolTable.set(new TypeInfo(Global.INT_TYPE_ID, TokenType.INT_TYPE));
+            symbolTable.set(new TypeInfo(Global.FLOAT_TYPE_ID, TokenType.FLOAT_TYPE));
+            symbolTable.set(new OperatorInfo("+", TokenType.ADD));
+            symbolTable.set(new OperatorInfo("-", TokenType.SUB));
+            symbolTable.set(new OperatorInfo("*", TokenType.MULT));
+            symbolTable.set(new OperatorInfo("/", TokenType.DIV));
+            symbolTable.set(new OperatorInfo(".", TokenType.DOT));
+            symbolTable.set(new OperatorInfo(":", TokenType.COLON));
+            symbolTable.set(new OperatorInfo("(", TokenType.LPAREN));
+            symbolTable.set(new OperatorInfo(")", TokenType.RPAREN));
+            symbolTable.set(new OperatorInfo(";", TokenType.SEMICOLON));
+            symbolTable.set(new OperatorInfo("=", TokenType.ASSIGNMENT));
 
             init = true;
         }
@@ -70,9 +69,8 @@ public class SymbolTable {
      * @return a symbol if one exists in the table and null otherwise.
      */
     private SymbolInfo getSymbol(String keyStr, SymbolType symbolType) {
-        Token dummyToken = new Token(keyStr);
-        SymbolInfo dummyInfo = new SymbolInfo(dummyToken, symbolType);
-        return get(dummyInfo);
+        SymbolInfo dummy = new SymbolInfo(keyStr, TokenType.UNKNOWN, symbolType);
+        return get(dummy);
     }
 
     /**
@@ -83,9 +81,8 @@ public class SymbolTable {
      * @return an ID symbol if one exists in the table and null otherwise.
      */
     public SymbolInfo getID(String keyStr, Block scope) {
-        Token dummyToken = new Token(keyStr);
-        IDInfo dummyInfo = new IDInfo(dummyToken, scope, null, true);
-        return get(dummyInfo);
+        IDInfo dummy = new IDInfo(keyStr, scope, null, true);
+        return get(dummy);
     }
 
     /**

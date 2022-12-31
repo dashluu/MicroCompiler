@@ -56,21 +56,21 @@ public class StatementParser {
         currToken = lexer.getNextToken();
         // Check if there is an ID name
         if (currToken == null) {
-            throw new SyntaxError("Missing a variable name after the declaration keyword", lexer.getCurrLine());
+            throw new SyntaxError("Missing a variable name after the declaration keyword", lexer.getCurrentLine());
         }
 
         SymbolTable symbolTable = SymbolTable.getInstance();
         String currTokenStr = currToken.getValue();
         // Check if the ID is valid
         if (symbolTable.isID(currTokenStr, scope)) {
-            throw new SyntaxError("Cannot redeclare an existing variable", lexer.getCurrLine());
+            throw new SyntaxError("Cannot redeclare an existing variable", lexer.getCurrentLine());
         } else if (symbolTable.isKeyword(currTokenStr) || symbolTable.isType(currTokenStr)) {
-            throw new SyntaxError("Cannot use a reserved keyword for a variable name", lexer.getCurrLine());
+            throw new SyntaxError("Cannot use a reserved keyword for a variable name", lexer.getCurrentLine());
         } else if (symbolTable.isOperator(currTokenStr)) {
-            throw new SyntaxError("Cannot use an operator as a variable name", lexer.getCurrLine());
+            throw new SyntaxError("Cannot use an operator as a variable name", lexer.getCurrentLine());
         } else if (!isIDValid(currTokenStr)) {
             throw new SyntaxError("A variable name can only consist of alphanumeric characters and underscores",
-                    lexer.getCurrLine());
+                    lexer.getCurrentLine());
         }
 
         Token idToken = currToken;
@@ -78,38 +78,38 @@ public class StatementParser {
         currToken = lexer.getNextToken();
         // Check if ';' is missing
         if (currToken == null) {
-            throw new SyntaxError("Missing ':' after '" + id + "'", lexer.getCurrLine());
+            throw new SyntaxError("Missing ':' after '" + id + "'", lexer.getCurrentLine());
         }
 
         currTokenType = currToken.getType();
         // Check if the token is ';'
         if (currTokenType != TokenType.SEMICOLON) {
-            throw new SyntaxError("Expected ':' after '" + id + "'", lexer.getCurrLine());
+            throw new SyntaxError("Expected ':' after '" + id + "'", lexer.getCurrentLine());
         }
 
         currToken = lexer.getNextToken();
         // Check if a type token is missing
         if (currToken == null) {
-            throw new SyntaxError("Missing a variable type for '" + id + "'", lexer.getCurrLine());
+            throw new SyntaxError("Missing a variable type for '" + id + "'", lexer.getCurrentLine());
         }
 
         currTokenStr = currToken.getValue();
         TypeInfo idDataType = (TypeInfo) symbolTable.getType(currTokenStr);
         // Check if the token is a valid type
         if (idDataType == null) {
-            throw new SyntaxError("Invalid type for '" + id + "'", lexer.getCurrLine());
+            throw new SyntaxError("Invalid type for '" + id + "'", lexer.getCurrentLine());
         }
 
         currToken = lexer.getNextToken();
         // Check if '=' is present
         if (currToken == null) {
-            throw new SyntaxError("Missing '='", lexer.getCurrLine());
+            throw new SyntaxError("Missing '='", lexer.getCurrentLine());
         }
 
         currTokenStr = currToken.getValue();
         currTokenType = currToken.getType();
         if (currTokenType != TokenType.ASSIGNMENT) {
-            throw new SyntaxError("Expected '=' but instead got '" + currTokenStr + "'", lexer.getCurrLine());
+            throw new SyntaxError("Expected '=' but instead got '" + currTokenStr + "'", lexer.getCurrentLine());
         }
 
         Node assignmentRoot = new Node(NodeType.ASSIGNMENT);
@@ -156,7 +156,7 @@ public class StatementParser {
         currToken = lexer.getNextToken();
         // Check if '=' is present
         if (currToken == null) {
-            throw new SyntaxError("Expected an assignment or a valid expression", lexer.getCurrLine());
+            throw new SyntaxError("Expected an assignment or a valid expression", lexer.getCurrentLine());
         }
 
         TokenType currTokenType = currToken.getType();

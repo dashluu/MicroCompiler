@@ -1,9 +1,9 @@
 package Symbols;
 
-import Utilities.Token;
+import Utilities.TokenType;
 
 public class OperatorInfo extends SymbolInfo {
-    public OperatorInfo(Token token) {
-        super(token, SymbolType.OPERATOR);
+    public OperatorInfo(String id, TokenType idType) {
+        super(id, idType, SymbolType.OPERATOR);
     }
 }

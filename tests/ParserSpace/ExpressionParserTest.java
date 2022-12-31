@@ -99,9 +99,9 @@ class ExpressionParserTest {
         SymbolTable symbolTable = SymbolTable.getInstance();
         TypeInfo intType = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
         TypeInfo floatType = (TypeInfo) symbolTable.getType(Global.FLOAT_TYPE_ID);
-        symbolTable.set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope, intType, true));
-        symbolTable.set(new IDInfo(new Token("b", TokenType.ID), Global.globalScope, intType, true));
-        symbolTable.set(new IDInfo(new Token("c", TokenType.ID), Global.globalScope, floatType, true));
+        symbolTable.set(new IDInfo("a", Global.globalScope, intType, true));
+        symbolTable.set(new IDInfo("b", Global.globalScope, intType, true));
+        symbolTable.set(new IDInfo("c", Global.globalScope, floatType, true));
 
         try {
             ArrayList<TokenNode> actualInfixNodes = getExprInfixNodesHelper(inputStr, Global.globalScope);
@@ -133,7 +133,7 @@ class ExpressionParserTest {
         // Set up the symbol table
         SymbolTable symbolTable = SymbolTable.getInstance();
         TypeInfo type = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
-        symbolTable.set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope, type, true));
+        symbolTable.set(new IDInfo("a", Global.globalScope, type, true));
 
         try {
             ArrayList<TokenNode> actualInfixNodes = getExprInfixNodesHelper(inputStr, Global.globalScope);
@@ -161,7 +161,7 @@ class ExpressionParserTest {
         // Set up the symbol table
         SymbolTable symbolTable = SymbolTable.getInstance();
         TypeInfo type = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
-        symbolTable.set(new IDInfo(new Token("a", TokenType.ID), Global.globalScope, type, true));
+        symbolTable.set(new IDInfo("a", Global.globalScope, type, true));
 
         try {
             ArrayList<TokenNode> actualPostfixNodes = getExprPostfixNodesHelper(inputStr, Global.globalScope);

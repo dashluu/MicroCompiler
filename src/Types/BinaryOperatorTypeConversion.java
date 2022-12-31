@@ -18,8 +18,8 @@ public class BinaryOperatorTypeConversion extends OperatorTypeConversion {
     @Override
     public int hashCode() {
         String hashStr = opId.name() +
-                typeConversion.getLeftType().getToken().getType().name() +
-                typeConversion.getRightType().getToken().getType().name();
+                typeConversion.getLeftType().getId() +
+                typeConversion.getRightType().getId();
         return hashStr.hashCode();
     }
 

@@ -1,19 +1,25 @@
 package Symbols;
 
-import Utilities.Token;
+import Utilities.TokenType;
 
 public class SymbolInfo {
 
-    protected final Token token;
+    protected final String id;
+    protected final TokenType idType;
     protected final SymbolType symbolType;
 
-    public SymbolInfo(Token token, SymbolType symbolType) {
-        this.token = token;
+    public SymbolInfo(String id, TokenType idType, SymbolType symbolType) {
+        this.id = id;
+        this.idType = idType;
         this.symbolType = symbolType;
     }
 
-    public Token getToken() {
-        return token;
+    public String getId() {
+        return id;
+    }
+
+    public TokenType getIdType() {
+        return idType;
     }
 
     public SymbolType getSymbolType() {
@@ -22,7 +28,7 @@ public class SymbolInfo {
 
     @Override
     public int hashCode() {
-        return token.getValue().hashCode();
+        return id.hashCode();
     }
 
     @Override
@@ -33,6 +39,6 @@ public class SymbolInfo {
         if (!(obj instanceof SymbolInfo symbol)) {
             return false;
         }
-        return token.getValue().equals(symbol.token.getValue()) && symbolType == symbol.symbolType;
+        return id.equals(symbol.id) && symbolType == symbol.symbolType;
     }
 }
