@@ -4,9 +4,10 @@ import Exceptions.SyntaxError;
 import LexerSpace.Lexer;
 import Operators.OperatorTable;
 import Symbols.IDInfo;
-import Symbols.SymbolInfo;
 import Symbols.SymbolTable;
 import Symbols.TypeInfo;
+import Types.TypeConversion;
+import Types.TypeTable;
 import Utilities.Block;
 import Utilities.Global;
 import Utilities.Token;
@@ -255,20 +256,26 @@ public class ExpressionParser {
      * @param postfixNodes a list of nodes in postfix order.
      * @return the root node of the AST.
      */
-    public Node buildASTFromPostFix(ArrayList<TokenNode> postfixNodes) {
+    public Node buildASTFromPostFix(ArrayList<TokenNode> postfixNodes) throws SyntaxError {
         // If the postfix list is empty, immediately return null
         if (postfixNodes.isEmpty()) {
             return null;
         }
 
+        TypeTable typeTable = TypeTable.getInstance();
         ArrayDeque<TokenNode> tempStack = new ArrayDeque<>();
         Token currToken;
+        String currTokenStr;
         TokenType currTokenType;
-        TokenNode operandNode1;
-        TokenNode operandNode2;
+        TokenNode operandNode1, operandNode2;
+        TypeInfo type1, type2, resultType;
+        TypeConversionNode typeConversionNode;
+        TypeConversion typeConversion;
+        boolean typeCompatible;
 
         for (TokenNode currNode : postfixNodes) {
             currToken = currNode.getToken();
+            currTokenStr = currToken.getValue();
             currTokenType = currToken.getType();
             if (currTokenType == TokenType.ID || currTokenType == TokenType.INT || currTokenType == TokenType.FLOAT) {
                 // Push the operand onto the temp stack
@@ -277,16 +284,55 @@ public class ExpressionParser {
                 // Since this is a unary operator, remove one node from the stack and assign it as the only child
                 // of the current operator node
                 operandNode1 = tempStack.removeLast();
+                // Type check the operand to determine if it is compatible with the operator
+                type1 = operandNode1.getType();
+                typeCompatible = typeTable.IsTypeCompatibleUsingUnaryOperator(currTokenType, type1);
+                if (!typeCompatible) {
+                    throw new SyntaxError("Type '" + type1.getToken().getValue() +
+                            "' is not compatible with the operator '" + currTokenStr + "'",
+                            lexer.getCurrLine());
+                }
                 currNode.addChild(operandNode1);
+                currNode.setType(type1);
                 // Push the new root node onto the stack
                 tempStack.add(currNode);
             } else {
                 // The node stores a binary operator
                 // Remove two nodes from the stack and assign them as current operator node's children
-                operandNode1 = tempStack.removeLast();
                 operandNode2 = tempStack.removeLast();
-                currNode.addChild(operandNode1);
-                currNode.addChild(operandNode2);
+                operandNode1 = tempStack.removeLast();
+                // Type check the two operands
+                type1 = operandNode1.getType();
+                type2 = operandNode2.getType();
+                typeCompatible = typeTable.AreTypesCompatibleUsingBinaryOperator(currTokenType, type1, type2);
+                if (!typeCompatible) {
+                    throw new SyntaxError("Type '" + type1.getToken().getValue() +
+                            "' and type '" + type2.getToken().getValue() +
+                            "' are not compatible using the operator '" + currTokenStr + "'",
+                            lexer.getCurrLine());
+                }
+                if (type1 != type2) {
+                    // If the two types are not the same but compatible with the given operator,
+                    // add a conversion node that indicates the type to be converted to
+                    typeConversion = typeTable.getTypeConversion(type1, type2);
+                    resultType = typeConversion.getResultType();
+                    typeConversionNode = new TypeConversionNode(resultType);
+                    currNode.addChild(typeConversionNode);
+                    currNode.setType(resultType);
+                    if (resultType != type1) {
+                        typeConversionNode.addChild(operandNode1);
+                        currNode.addChild(operandNode2);
+                    } else {
+                        typeConversionNode.addChild(operandNode2);
+                        currNode.addChild(operandNode1);
+                    }
+                } else {
+                    // If the two types are the same and compatible using the given operator,
+                    // the final target type must also be the same as the two types
+                    currNode.addChild(operandNode1);
+                    currNode.addChild(operandNode2);
+                    currNode.setType(type1);
+                }
                 // Push the new root node onto the stack
                 tempStack.add(currNode);
             }
