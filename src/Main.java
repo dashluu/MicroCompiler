@@ -1,6 +1,8 @@
 import Exceptions.SyntaxError;
 import LexerSpace.Lexer;
+import ParserSpace.BlockParser;
 import ParserSpace.ExpressionParser;
+import ParserSpace.StatementParser;
 import Symbols.IDInfo;
 import Symbols.SymbolTable;
 import Symbols.TypeInfo;
@@ -19,9 +21,11 @@ public class Main {
         BufferedReader reader = new BufferedReader(new FileReader(fileName));
         Lexer lexer = new Lexer(reader);
         ExpressionParser expressionParser = new ExpressionParser(lexer);
+        StatementParser statementParser = new StatementParser(expressionParser);
+        BlockParser blockParser = new BlockParser(statementParser);
         SymbolTable symbolTable = SymbolTable.getInstance();
         TypeInfo type = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
         symbolTable.set(new IDInfo("a", Global.globalScope, type, true));
-        expressionParser.parseExpression(Global.globalScope);
+        blockParser.parseBlock(Global.globalScope);
     }
 }
