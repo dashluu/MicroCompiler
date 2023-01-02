@@ -17,32 +17,36 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ExpressionParserTest {
 
+    private final SymbolTable symbolTable = SymbolTable.getInstance();
+    private final TypeInfo intType = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
+    private final TypeInfo floatType = (TypeInfo) symbolTable.getType(Global.FLOAT_TYPE_ID);
+
     private ExpressionParser initExprParser(String inputStr) {
         BufferedReader reader = new BufferedReader(new StringReader(inputStr));
         Lexer lexer = new Lexer(reader);
         return new ExpressionParser(lexer);
     }
 
-    private ArrayList<TokenNode> getExprInfixNodesHelper(String inputStr, Block scope)
+    private ArrayList<ExpressionNode> getExprInfixNodesHelper(String inputStr, Block scope)
             throws SyntaxError, IOException {
         ExpressionParser exprParser = initExprParser(inputStr);
         return exprParser.getExpressionInfixNodes(scope);
     }
 
-    private ArrayList<TokenNode> getExprPostfixNodesHelper(String inputStr, Block scope)
+    private ArrayList<ExpressionNode> getExprPostfixNodesHelper(String inputStr, Block scope)
             throws SyntaxError, IOException {
         ExpressionParser exprParser = initExprParser(inputStr);
-        ArrayList<TokenNode> infixNodes = exprParser.getExpressionInfixNodes(scope);
+        ArrayList<ExpressionNode> infixNodes = exprParser.getExpressionInfixNodes(scope);
         return exprParser.getPostfixOrder(infixNodes);
     }
 
     @Test
     void testGetEmptyExprInfixNodes() {
         String inputStr = "";
-        ArrayList<TokenNode> expectedInfixNodes = new ArrayList<>();
+        ArrayList<ExpressionNode> expectedInfixNodes = new ArrayList<>();
 
         try {
-            ArrayList<TokenNode> actualInfixNodes = getExprInfixNodesHelper(inputStr, Global.globalScope);
+            ArrayList<ExpressionNode> actualInfixNodes = getExprInfixNodesHelper(inputStr, Global.globalScope);
             assertEquals(expectedInfixNodes, actualInfixNodes);
         } catch (SyntaxError | IOException e) {
             e.printStackTrace();
@@ -52,10 +56,10 @@ class ExpressionParserTest {
     @Test
     void testGetBlankExprInfixNodes() {
         String inputStr = "\t \n\n";
-        ArrayList<TokenNode> expectedInfixNodes = new ArrayList<>();
+        ArrayList<ExpressionNode> expectedInfixNodes = new ArrayList<>();
 
         try {
-            ArrayList<TokenNode> actualInfixNodes = getExprInfixNodesHelper(inputStr, Global.globalScope);
+            ArrayList<ExpressionNode> actualInfixNodes = getExprInfixNodesHelper(inputStr, Global.globalScope);
             assertEquals(expectedInfixNodes, actualInfixNodes);
         } catch (SyntaxError | IOException e) {
             e.printStackTrace();
@@ -65,46 +69,43 @@ class ExpressionParserTest {
     @Test
     void testGetExprInfixNodesValid2() {
         String inputStr = "\na \n*\nb+ .e-. /34.*-41--+35/c+\t((777-4)+12 \n*95)";
-        ArrayList<TokenNode> expectedInfixNodes = new ArrayList<>();
-        expectedInfixNodes.add(new TokenNode(new Token("a", TokenType.ID)));
-        expectedInfixNodes.add(new TokenNode(new Token("*", TokenType.MULT)));
-        expectedInfixNodes.add(new TokenNode(new Token("b", TokenType.ID)));
-        expectedInfixNodes.add(new TokenNode(new Token("+", TokenType.ADD)));
-        expectedInfixNodes.add(new TokenNode(new Token("0.0e-0.0", TokenType.FLOAT)));
-        expectedInfixNodes.add(new TokenNode(new Token("/", TokenType.DIV)));
-        expectedInfixNodes.add(new TokenNode(new Token("34.0", TokenType.FLOAT)));
-        expectedInfixNodes.add(new TokenNode(new Token("*", TokenType.MULT)));
-        expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
-        expectedInfixNodes.add(new TokenNode(new Token("41", TokenType.INT)));
-        expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.SUB)));
-        expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
-        expectedInfixNodes.add(new TokenNode(new Token("+", TokenType.PLUS)));
-        expectedInfixNodes.add(new TokenNode(new Token("35", TokenType.INT)));
-        expectedInfixNodes.add(new TokenNode(new Token("/", TokenType.DIV)));
-        expectedInfixNodes.add(new TokenNode(new Token("c", TokenType.ID)));
-        expectedInfixNodes.add(new TokenNode(new Token("+", TokenType.ADD)));
-        expectedInfixNodes.add(new TokenNode(new Token("(", TokenType.LPAREN)));
-        expectedInfixNodes.add(new TokenNode(new Token("(", TokenType.LPAREN)));
-        expectedInfixNodes.add(new TokenNode(new Token("777", TokenType.INT)));
-        expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.SUB)));
-        expectedInfixNodes.add(new TokenNode(new Token("4", TokenType.INT)));
-        expectedInfixNodes.add(new TokenNode(new Token(")", TokenType.RPAREN)));
-        expectedInfixNodes.add(new TokenNode(new Token("+", TokenType.ADD)));
-        expectedInfixNodes.add(new TokenNode(new Token("12", TokenType.INT)));
-        expectedInfixNodes.add(new TokenNode(new Token("*", TokenType.MULT)));
-        expectedInfixNodes.add(new TokenNode(new Token("95", TokenType.INT)));
-        expectedInfixNodes.add(new TokenNode(new Token(")", TokenType.RPAREN)));
+        ArrayList<ExpressionNode> expectedInfixNodes = new ArrayList<>();
+        expectedInfixNodes.add(new ExpressionNode("a", TokenType.ID, intType));
+        expectedInfixNodes.add(new ExpressionNode("*", TokenType.MULT));
+        expectedInfixNodes.add(new ExpressionNode("b", TokenType.ID, intType));
+        expectedInfixNodes.add(new ExpressionNode("+", TokenType.ADD));
+        expectedInfixNodes.add(new ExpressionNode("0.0e-0.0", TokenType.FLOAT, floatType));
+        expectedInfixNodes.add(new ExpressionNode("/", TokenType.DIV));
+        expectedInfixNodes.add(new ExpressionNode("34.0", TokenType.FLOAT, floatType));
+        expectedInfixNodes.add(new ExpressionNode("*", TokenType.MULT));
+        expectedInfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
+        expectedInfixNodes.add(new ExpressionNode("41", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode("-", TokenType.SUB));
+        expectedInfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
+        expectedInfixNodes.add(new ExpressionNode("+", TokenType.PLUS));
+        expectedInfixNodes.add(new ExpressionNode("35", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode("/", TokenType.DIV));
+        expectedInfixNodes.add(new ExpressionNode("c", TokenType.ID, floatType));
+        expectedInfixNodes.add(new ExpressionNode("+", TokenType.ADD));
+        expectedInfixNodes.add(new ExpressionNode("(", TokenType.LPAREN));
+        expectedInfixNodes.add(new ExpressionNode("(", TokenType.LPAREN));
+        expectedInfixNodes.add(new ExpressionNode("777", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode("-", TokenType.SUB));
+        expectedInfixNodes.add(new ExpressionNode("4", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode(")", TokenType.RPAREN));
+        expectedInfixNodes.add(new ExpressionNode("+", TokenType.ADD));
+        expectedInfixNodes.add(new ExpressionNode("12", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode("*", TokenType.MULT));
+        expectedInfixNodes.add(new ExpressionNode("95", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode(")", TokenType.RPAREN));
 
         // Set up the symbol table
-        SymbolTable symbolTable = SymbolTable.getInstance();
-        TypeInfo intType = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
-        TypeInfo floatType = (TypeInfo) symbolTable.getType(Global.FLOAT_TYPE_ID);
         symbolTable.set(new IDInfo("a", Global.globalScope, intType, true));
         symbolTable.set(new IDInfo("b", Global.globalScope, intType, true));
         symbolTable.set(new IDInfo("c", Global.globalScope, floatType, true));
 
         try {
-            ArrayList<TokenNode> actualInfixNodes = getExprInfixNodesHelper(inputStr, Global.globalScope);
+            ArrayList<ExpressionNode> actualInfixNodes = getExprInfixNodesHelper(inputStr, Global.globalScope);
             assertEquals(expectedInfixNodes, actualInfixNodes);
         } catch (SyntaxError | IOException e) {
             e.printStackTrace();
@@ -114,29 +115,27 @@ class ExpressionParserTest {
     @Test
     void testGetExprInfixNodesValid3() {
         String inputStr = "    a+a  *(-2.e-1+--(75))\t";
-        ArrayList<TokenNode> expectedInfixNodes = new ArrayList<>();
-        expectedInfixNodes.add(new TokenNode(new Token("a", TokenType.ID)));
-        expectedInfixNodes.add(new TokenNode(new Token("+", TokenType.ADD)));
-        expectedInfixNodes.add(new TokenNode(new Token("a", TokenType.ID)));
-        expectedInfixNodes.add(new TokenNode(new Token("*", TokenType.MULT)));
-        expectedInfixNodes.add(new TokenNode(new Token("(", TokenType.LPAREN)));
-        expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
-        expectedInfixNodes.add(new TokenNode(new Token("2.0e-1", TokenType.FLOAT)));
-        expectedInfixNodes.add(new TokenNode(new Token("+", TokenType.ADD)));
-        expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
-        expectedInfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
-        expectedInfixNodes.add(new TokenNode(new Token("(", TokenType.LPAREN)));
-        expectedInfixNodes.add(new TokenNode(new Token("75", TokenType.INT)));
-        expectedInfixNodes.add(new TokenNode(new Token(")", TokenType.RPAREN)));
-        expectedInfixNodes.add(new TokenNode(new Token(")", TokenType.RPAREN)));
+        ArrayList<ExpressionNode> expectedInfixNodes = new ArrayList<>();
+        expectedInfixNodes.add(new ExpressionNode("a", TokenType.ID, intType));
+        expectedInfixNodes.add(new ExpressionNode("+", TokenType.ADD));
+        expectedInfixNodes.add(new ExpressionNode("a", TokenType.ID, intType));
+        expectedInfixNodes.add(new ExpressionNode("*", TokenType.MULT));
+        expectedInfixNodes.add(new ExpressionNode("(", TokenType.LPAREN));
+        expectedInfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
+        expectedInfixNodes.add(new ExpressionNode("2.0e-1", TokenType.FLOAT, floatType));
+        expectedInfixNodes.add(new ExpressionNode("+", TokenType.ADD));
+        expectedInfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
+        expectedInfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
+        expectedInfixNodes.add(new ExpressionNode("(", TokenType.LPAREN));
+        expectedInfixNodes.add(new ExpressionNode("75", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode(")", TokenType.RPAREN));
+        expectedInfixNodes.add(new ExpressionNode(")", TokenType.RPAREN));
 
         // Set up the symbol table
-        SymbolTable symbolTable = SymbolTable.getInstance();
-        TypeInfo type = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
-        symbolTable.set(new IDInfo("a", Global.globalScope, type, true));
+        symbolTable.set(new IDInfo("a", Global.globalScope, intType, true));
 
         try {
-            ArrayList<TokenNode> actualInfixNodes = getExprInfixNodesHelper(inputStr, Global.globalScope);
+            ArrayList<ExpressionNode> actualInfixNodes = getExprInfixNodesHelper(inputStr, Global.globalScope);
             assertEquals(expectedInfixNodes, actualInfixNodes);
         } catch (SyntaxError | IOException e) {
             e.printStackTrace();
@@ -146,25 +145,23 @@ class ExpressionParserTest {
     @Test
     void testGetExprPostfixNodesValid1() {
         String inputStr = "a+\ta \n*(-2.e-1\n+-\n-(75))";
-        ArrayList<TokenNode> expectedPostfixNodes = new ArrayList<>();
-        expectedPostfixNodes.add(new TokenNode(new Token("a", TokenType.ID)));
-        expectedPostfixNodes.add(new TokenNode(new Token("a", TokenType.ID)));
-        expectedPostfixNodes.add(new TokenNode(new Token("2.0e-1", TokenType.FLOAT)));
-        expectedPostfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
-        expectedPostfixNodes.add(new TokenNode(new Token("75", TokenType.INT)));
-        expectedPostfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
-        expectedPostfixNodes.add(new TokenNode(new Token("-", TokenType.MINUS)));
-        expectedPostfixNodes.add(new TokenNode(new Token("+", TokenType.ADD)));
-        expectedPostfixNodes.add(new TokenNode(new Token("*", TokenType.MULT)));
-        expectedPostfixNodes.add(new TokenNode(new Token("+", TokenType.ADD)));
+        ArrayList<ExpressionNode> expectedPostfixNodes = new ArrayList<>();
+        expectedPostfixNodes.add(new ExpressionNode("a", TokenType.ID, intType));
+        expectedPostfixNodes.add(new ExpressionNode("a", TokenType.ID, intType));
+        expectedPostfixNodes.add(new ExpressionNode("2.0e-1", TokenType.FLOAT, floatType));
+        expectedPostfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
+        expectedPostfixNodes.add(new ExpressionNode("75", TokenType.INT, intType));
+        expectedPostfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
+        expectedPostfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
+        expectedPostfixNodes.add(new ExpressionNode("+", TokenType.ADD));
+        expectedPostfixNodes.add(new ExpressionNode("*", TokenType.MULT));
+        expectedPostfixNodes.add(new ExpressionNode("+", TokenType.ADD));
 
         // Set up the symbol table
-        SymbolTable symbolTable = SymbolTable.getInstance();
-        TypeInfo type = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
-        symbolTable.set(new IDInfo("a", Global.globalScope, type, true));
+        symbolTable.set(new IDInfo("a", Global.globalScope, intType, true));
 
         try {
-            ArrayList<TokenNode> actualPostfixNodes = getExprPostfixNodesHelper(inputStr, Global.globalScope);
+            ArrayList<ExpressionNode> actualPostfixNodes = getExprPostfixNodesHelper(inputStr, Global.globalScope);
             assertEquals(expectedPostfixNodes, actualPostfixNodes);
         } catch (SyntaxError | IOException e) {
             e.printStackTrace();

@@ -13,6 +13,10 @@ public class Node {
         this.nodeType = nodeType;
     }
 
+    public NodeType getNodeType() {
+        return nodeType;
+    }
+
     public Node getChild(int index) {
         if (index < 0 || index >= children.size()) {
             throw new IndexOutOfBoundsException("Invalid index for the child node");

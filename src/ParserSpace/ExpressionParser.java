@@ -38,8 +38,8 @@ public class ExpressionParser {
      * @throws IOException if the read operation causes an IO error.
      */
     public Node parseExpression(Block scope) throws SyntaxError, IOException {
-        ArrayList<TokenNode> infixNodes = getExpressionInfixNodes(scope);
-        ArrayList<TokenNode> postfixNodes = getPostfixOrder(infixNodes);
+        ArrayList<ExpressionNode> infixNodes = getExpressionInfixNodes(scope);
+        ArrayList<ExpressionNode> postfixNodes = getPostfixOrder(infixNodes);
         return buildASTFromPostFix(postfixNodes);
     }
 
@@ -51,8 +51,8 @@ public class ExpressionParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if the read operation causes an IO error.
      */
-    public ArrayList<TokenNode> getExpressionInfixNodes(Block scope) throws SyntaxError, IOException {
-        ArrayList<TokenNode> nodes = new ArrayList<>();
+    public ArrayList<ExpressionNode> getExpressionInfixNodes(Block scope) throws SyntaxError, IOException {
+        ArrayList<ExpressionNode> nodes = new ArrayList<>();
         recurParseExpression(nodes, scope);
         return nodes;
     }
@@ -66,7 +66,7 @@ public class ExpressionParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if the read operation causes an IO error.
      */
-    private void recurParseExpressionHelper(ArrayList<TokenNode> nodes, Block scope, String str)
+    private void recurParseExpressionHelper(ArrayList<ExpressionNode> nodes, Block scope, String str)
             throws SyntaxError, IOException {
         // If the size of the list is unchanged, an expression is clearly missing
         int numNodesBefore = nodes.size();
@@ -85,7 +85,7 @@ public class ExpressionParser {
      * @throws IOException if the read operation causes an IO error.
      * @throws SyntaxError if there is a syntax error.
      */
-    private void recurParseExpression(ArrayList<TokenNode> nodes, Block scope) throws SyntaxError, IOException {
+    private void recurParseExpression(ArrayList<ExpressionNode> nodes, Block scope) throws SyntaxError, IOException {
         /*
           Expr = '(' Expr ')' [binary operator] Expr
                = '+/-' Expr [binary operator] Expr
@@ -119,15 +119,15 @@ public class ExpressionParser {
             }
             // Get the ID's data type
             currTokenDataType = idInfo.getDataType();
-            nodes.add(new TokenNode(currToken, currTokenDataType));
+            nodes.add(new ExpressionNode(currTokenStr, currTokenType, currTokenDataType));
         } else if (currTokenType == TokenType.INT) {
             // Consume an integer
             currTokenDataType = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
-            nodes.add(new TokenNode(currToken, currTokenDataType));
+            nodes.add(new ExpressionNode(currTokenStr, currTokenType, currTokenDataType));
         } else if (currTokenType == TokenType.FLOAT) {
             // Consume a floating point
             currTokenDataType = (TypeInfo) symbolTable.getType(Global.FLOAT_TYPE_ID);
-            nodes.add(new TokenNode(currToken, currTokenDataType));
+            nodes.add(new ExpressionNode(currTokenStr, currTokenType, currTokenDataType));
         } else if (isOpBinary) {
             // Try to map the binary operator to a unary operator since a token can be both a binary or a unary operator
             // For example, '+' and '-'
@@ -136,21 +136,23 @@ public class ExpressionParser {
                 throw new SyntaxError("Invalid unary operator '" + currTokenStr + "'", lexer.getCurrentLine());
             }
             currToken.setType(unaryOpTokenType);
-            nodes.add(new TokenNode(currToken));
+            currTokenType = unaryOpTokenType;
+            nodes.add(new ExpressionNode(currTokenStr, currTokenType));
             // Recursively parse an expression
             recurParseExpressionHelper(nodes, scope, currTokenStr);
         } else {
             // Consume '(' and increment the number of parentheses
-            nodes.add(new TokenNode(currToken));
+            nodes.add(new ExpressionNode(currTokenStr, currTokenType));
             ++numParen;
             // Recursively parse an expression
             recurParseExpressionHelper(nodes, scope, currTokenStr);
             // Consume ')' and decrement the number of parentheses
             currToken = lexer.getNextToken();
-            if (currToken == null || currToken.getType() != TokenType.RPAREN) {
+            if (currToken == null || (currTokenType = currToken.getType()) != TokenType.RPAREN) {
                 throw new SyntaxError("Missing ')'", lexer.getCurrentLine());
             }
-            nodes.add(new TokenNode(currToken));
+            currTokenStr = currToken.getValue();
+            nodes.add(new ExpressionNode(currTokenStr, currTokenType));
             --numParen;
         }
 
@@ -165,13 +167,19 @@ public class ExpressionParser {
         currTokenType = currToken.getType();
 
         if (currTokenType == TokenType.RPAREN) {
-            // Check if ')' is redundant
+            // If the token is ')', check if ')' is redundant
+            // If it is, throw an exception
+            // Otherwise, put it back to the lexer's token buffer and return
             if (numParen > 0) {
                 lexer.putBack(currToken);
                 return;
             } else {
                 throw new SyntaxError("Redundant ')'", lexer.getCurrentLine());
             }
+        } else if (currTokenType == TokenType.SEMICOLON) {
+            // If the token is ';', put it back to the lexer's token buffer and return
+            lexer.putBack(currToken);
+            return;
         }
 
         // Check if the token is a valid binary operator
@@ -180,7 +188,7 @@ public class ExpressionParser {
         if (!isOpBinary) {
             throw new SyntaxError("Invalid binary operator '" + currTokenStr + "'", lexer.getCurrentLine());
         }
-        nodes.add(new TokenNode(currToken));
+        nodes.add(new ExpressionNode(currTokenStr, currTokenType));
 
         // Recursively parse an expression
         recurParseExpressionHelper(nodes, scope, currTokenStr);
@@ -192,31 +200,29 @@ public class ExpressionParser {
      * @param nodes list of input nodes.
      * @return a list of nodes in postfix order.
      */
-    public ArrayList<TokenNode> getPostfixOrder(ArrayList<TokenNode> nodes) {
+    public ArrayList<ExpressionNode> getPostfixOrder(ArrayList<ExpressionNode> nodes) {
         OperatorTable opTable = OperatorTable.getInstance();
-        ArrayList<TokenNode> postfixNodes = new ArrayList<>();
-        ArrayDeque<TokenNode> opStack = new ArrayDeque<>();
-        TokenNode opNode;
-        Token currToken;
-        TokenType currTokenType, opTokenType;
+        ArrayList<ExpressionNode> postfixNodes = new ArrayList<>();
+        ArrayDeque<ExpressionNode> opStack = new ArrayDeque<>();
+        ExpressionNode opNode;
+        TokenType currValueType, opValueType;
         boolean stop;
         int precedCmp;
 
-        for (TokenNode currNode : nodes) {
-            currToken = currNode.getToken();
-            currTokenType = currToken.getType();
+        for (ExpressionNode currNode : nodes) {
+            currValueType = currNode.getValueType();
             // The token is an operand so push it directly to the postfix list
-            if (currTokenType == TokenType.ID || currTokenType == TokenType.INT || currTokenType == TokenType.FLOAT) {
+            if (currValueType == TokenType.ID || currValueType == TokenType.INT || currValueType == TokenType.FLOAT) {
                 postfixNodes.add(currNode);
-            } else if (currTokenType == TokenType.LPAREN) {
+            } else if (currValueType == TokenType.LPAREN) {
                 opStack.add(currNode);
-            } else if (currTokenType == TokenType.RPAREN) {
+            } else if (currValueType == TokenType.RPAREN) {
                 stop = false;
                 // Pop the operator stack until '(' is encountered, discard it without adding it to the postfix list
                 while (!opStack.isEmpty() && !stop) {
                     opNode = opStack.removeLast();
-                    opTokenType = opNode.getToken().getType();
-                    stop = opTokenType == TokenType.LPAREN;
+                    opValueType = opNode.getValueType();
+                    stop = opValueType == TokenType.LPAREN;
                     if (!stop) {
                         postfixNodes.add(opNode);
                     }
@@ -227,10 +233,10 @@ public class ExpressionParser {
                 // the operator at the top of the stack has equal or greater preced than the current operator
                 while (!opStack.isEmpty() && !stop) {
                     opNode = opStack.getLast();
-                    opTokenType = opNode.getToken().getType();
-                    stop = opTokenType == TokenType.LPAREN;
+                    opValueType = opNode.getValueType();
+                    stop = opValueType == TokenType.LPAREN;
                     if (!stop) {
-                        precedCmp = opTable.compareOperatorPreced(opTokenType, currToken.getType());
+                        precedCmp = opTable.compareOperatorPreced(opValueType, currValueType);
                         stop = precedCmp < 0;
                     }
                     if (!stop) {
@@ -251,49 +257,121 @@ public class ExpressionParser {
     }
 
     /**
+     * Determines if an operand is compatible with the given unary operator.
+     *
+     * @param operatorNode a node containing the operator.
+     * @param operandNode  a node containing the operand.
+     * @throws SyntaxError if the operand is not compatible with the operator.
+     */
+    private void checkOperandTypeWithUnaryOperator(ExpressionNode operatorNode, ExpressionNode operandNode)
+            throws SyntaxError {
+        String operatorID = operatorNode.getValue();
+        TokenType operatorType = operatorNode.getValueType();
+        String operand = operandNode.getValue();
+        TypeInfo operandDataType = operandNode.getDataType();
+        String operandDataTypeId = operandDataType.getId();
+        TypeTable typeTable = TypeTable.getInstance();
+        // Type check the operand to determine if it is compatible with the operator
+        boolean typeCompatible = typeTable.IsTypeCompatibleUsingUnaryOperator(operatorType, operandDataType);
+        if (!typeCompatible) {
+            throw new SyntaxError("'" + operand + "' of type '" + operandDataTypeId +
+                    "' is not compatible with the operator '" + operatorID + "'",
+                    lexer.getCurrentLine());
+        }
+        operatorNode.addChild(operandNode);
+        operatorNode.setDataType(operandDataType);
+    }
+
+    /**
+     * Determines if two operands are compatible with the given binary operator.
+     *
+     * @param operatorNode a node containing the operator.
+     * @param operandNode1 the node containing the first operand.
+     * @param operandNode2 the node containing the second operand.
+     * @throws SyntaxError if the operands are not compatible with the operator.
+     */
+    private void checkOperandTypesWithBinaryOperators(ExpressionNode operatorNode,
+                                                      ExpressionNode operandNode1,
+                                                      ExpressionNode operandNode2) throws SyntaxError {
+        String operatorID = operatorNode.getValue();
+        TokenType operatorType = operatorNode.getValueType();
+        String operand1 = operandNode1.getValue();
+        String operand2 = operandNode2.getValue();
+        TypeInfo operandDataType1 = operandNode1.getDataType();
+        TypeInfo operandDataType2 = operandNode2.getDataType();
+        String operandDataTypeId1 = operandDataType1.getId();
+        String operandDataTypeId2 = operandDataType2.getId();
+        TypeTable typeTable = TypeTable.getInstance();
+        DataTypeNode typeConversionNode;
+        TypeConversion typeConversion;
+        TypeInfo resultType;
+        // Type check the two operands
+        boolean typeCompatible = typeTable.AreTypesCompatibleUsingBinaryOperator(operatorType, operandDataType1, operandDataType2);
+        if (!typeCompatible) {
+            throw new SyntaxError(
+                    "'" + operand1 + "' of type '" + operandDataTypeId1 +
+                            "' and '" + operand2 + "' of type '" + operandDataTypeId2 +
+                            "' are not compatible using the operator '" + operatorID + "'",
+                    lexer.getCurrentLine());
+        }
+        if (operandDataType1 != operandDataType2) {
+            // If the two types are not the same but compatible with the given operator,
+            // add a conversion node that indicates the type to be converted to
+            typeConversion = typeTable.getTypeConversion(operandDataType1, operandDataType2);
+            if (!typeConversion.isImplicit()) {
+                // If the type conversion is not implicit, there must be type casting
+                // If not, throw an exception
+                throw new SyntaxError(
+                        "Missing type casting from '" + operand1 +
+                                "' of type '" + operandDataTypeId1 + "' to '" + operand2 +
+                                "' of type '" + operandDataTypeId2 + "'", lexer.getCurrentLine());
+            }
+            resultType = typeConversion.getResultType();
+            typeConversionNode = new DataTypeNode(NodeType.TYPE_CONVERSION, resultType);
+            operatorNode.addChild(typeConversionNode);
+            operatorNode.setDataType(resultType);
+            if (resultType != operandDataType1) {
+                typeConversionNode.addChild(operandNode1);
+                operatorNode.addChild(operandNode2);
+            } else {
+                typeConversionNode.addChild(operandNode2);
+                operatorNode.addChild(operandNode1);
+            }
+        } else {
+            // If the two types are the same and compatible using the given operator,
+            // the final target type must also be the same as the two types
+            operatorNode.addChild(operandNode1);
+            operatorNode.addChild(operandNode2);
+            operatorNode.setDataType(operandDataType1);
+        }
+    }
+
+    /**
      * Builds an AST using a postfix ordered list of nodes.
      *
      * @param postfixNodes a list of nodes in postfix order.
      * @return the root node of the AST.
      */
-    public Node buildASTFromPostFix(ArrayList<TokenNode> postfixNodes) throws SyntaxError {
+    public Node buildASTFromPostFix(ArrayList<ExpressionNode> postfixNodes) throws SyntaxError {
         // If the postfix list is empty, immediately return null
         if (postfixNodes.isEmpty()) {
             return null;
         }
 
-        TypeTable typeTable = TypeTable.getInstance();
-        ArrayDeque<TokenNode> tempStack = new ArrayDeque<>();
-        Token currToken;
-        String currTokenStr;
-        TokenType currTokenType;
-        TokenNode operandNode1, operandNode2;
-        TypeInfo type1, type2, resultType;
-        TypeConversionNode typeConversionNode;
-        TypeConversion typeConversion;
-        boolean typeCompatible;
+        ArrayDeque<ExpressionNode> tempStack = new ArrayDeque<>();
+        TokenType currValueType;
+        ExpressionNode operandNode1, operandNode2;
 
-        for (TokenNode currNode : postfixNodes) {
-            currToken = currNode.getToken();
-            currTokenStr = currToken.getValue();
-            currTokenType = currToken.getType();
-            if (currTokenType == TokenType.ID || currTokenType == TokenType.INT || currTokenType == TokenType.FLOAT) {
+        for (ExpressionNode currNode : postfixNodes) {
+            currValueType = currNode.getValueType();
+            if (currValueType == TokenType.ID || currValueType == TokenType.INT || currValueType == TokenType.FLOAT) {
                 // Push the operand onto the temp stack
                 tempStack.add(currNode);
-            } else if (OperatorTable.getInstance().isOperatorUnary(currTokenType)) {
+            } else if (OperatorTable.getInstance().isOperatorUnary(currValueType)) {
                 // Since this is a unary operator, remove one node from the stack and assign it as the only child
                 // of the current operator node
                 operandNode1 = tempStack.removeLast();
-                // Type check the operand to determine if it is compatible with the operator
-                type1 = operandNode1.getType();
-                typeCompatible = typeTable.IsTypeCompatibleUsingUnaryOperator(currTokenType, type1);
-                if (!typeCompatible) {
-                    throw new SyntaxError("Type '" + type1.getId() +
-                            "' is not compatible with the operator '" + currTokenStr + "'",
-                            lexer.getCurrentLine());
-                }
-                currNode.addChild(operandNode1);
-                currNode.setType(type1);
+                checkOperandTypeWithUnaryOperator(currNode, operandNode1);
                 // Push the new root node onto the stack
                 tempStack.add(currNode);
             } else {
@@ -301,45 +379,13 @@ public class ExpressionParser {
                 // Remove two nodes from the stack and assign them as current operator node's children
                 operandNode2 = tempStack.removeLast();
                 operandNode1 = tempStack.removeLast();
-                // Type check the two operands
-                type1 = operandNode1.getType();
-                type2 = operandNode2.getType();
-                typeCompatible = typeTable.AreTypesCompatibleUsingBinaryOperator(currTokenType, type1, type2);
-                if (!typeCompatible) {
-                    throw new SyntaxError("Type '" + type1.getId() + "' and type '" + type2.getId() +
-                            "' are not compatible using the operator '" + currTokenStr + "'",
-                            lexer.getCurrentLine());
-                }
-                if (type1 != type2) {
-                    // If the two types are not the same but compatible with the given operator,
-                    // add a conversion node that indicates the type to be converted to
-                    typeConversion = typeTable.getTypeConversion(type1, type2);
-                    resultType = typeConversion.getResultType();
-                    typeConversionNode = new TypeConversionNode(resultType);
-                    currNode.addChild(typeConversionNode);
-                    currNode.setType(resultType);
-                    if (resultType != type1) {
-                        typeConversionNode.addChild(operandNode1);
-                        currNode.addChild(operandNode2);
-                    } else {
-                        typeConversionNode.addChild(operandNode2);
-                        currNode.addChild(operandNode1);
-                    }
-                } else {
-                    // If the two types are the same and compatible using the given operator,
-                    // the final target type must also be the same as the two types
-                    currNode.addChild(operandNode1);
-                    currNode.addChild(operandNode2);
-                    currNode.setType(type1);
-                }
+                checkOperandTypesWithBinaryOperators(currNode, operandNode1, operandNode2);
                 // Push the new root node onto the stack
                 tempStack.add(currNode);
             }
         }
 
         // If everything works correctly and postfix list is not empty, the temp stack should have one last node
-        Node exprRoot = new Node(NodeType.EXPR);
-        exprRoot.addChild(tempStack.removeLast());
-        return exprRoot;
+        return tempStack.removeLast();
     }
 }
