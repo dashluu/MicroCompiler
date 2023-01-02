@@ -32,6 +32,11 @@ public class SymbolInfo {
     }
 
     @Override
+    public String toString() {
+        return "Symbol ID: " + id;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

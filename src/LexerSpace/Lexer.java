@@ -45,6 +45,16 @@ public class Lexer {
     }
 
     /**
+     * Checks if lexer has reached the end of the stream.
+     *
+     * @return true if lexer has reached the end of the stream and false otherwise.
+     * @throws IOException if the read operation causes an IO error.
+     */
+    public boolean isEOS() throws IOException {
+        return charBuffer.peek() == EOS;
+    }
+
+    /**
      * Skips the spaces until a non-space character is encountered.
      *
      * @throws IOException if the read operation causes an IO error.
