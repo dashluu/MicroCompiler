@@ -38,7 +38,7 @@ public class Token {
 
     @Override
     public String toString() {
-        return value + ": " + tokenType;
+        return "token '" + value + "' of type '" + tokenType + "'";
     }
 
     @Override

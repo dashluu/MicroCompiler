@@ -31,8 +31,8 @@ public class ExpressionNode extends DataTypeNode {
     @Override
     public String toString() {
         return super.toString() +
-                ", value: " + value +
-                ", value type: " + valueType;
+                ", value '" + value +
+                "' of type '" + valueType + "'";
     }
 
     @Override

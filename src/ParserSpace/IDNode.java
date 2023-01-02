@@ -19,4 +19,17 @@ public class IDNode extends DataTypeNode {
     public boolean isDeclaration() {
         return isDecl;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + ", id '" + id + "'";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!super.equals(obj) || !(obj instanceof IDNode idNode)) {
+            return false;
+        }
+        return id.equals(idNode.id);
+    }
 }

@@ -6,4 +6,9 @@ public class OperatorInfo extends SymbolInfo {
     public OperatorInfo(String id, TokenType idType) {
         super(id, idType, SymbolType.OPERATOR);
     }
+
+    @Override
+    public String toString() {
+        return "operator '" + id + "'";
+    }
 }

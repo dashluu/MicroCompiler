@@ -208,6 +208,15 @@ public class StatementParser {
         return assignmentRoot;
     }
 
+    /**
+     * Determines if the left-hand side ID and the right-hand side expression are compatible with the assignment operator.
+     *
+     * @param lhsNode  the left-hand side node containing the ID declaration or reassignment information.
+     * @param exprNode the right-hand side node containing the expression information.
+     * @return either the current right-hand side node if there is no type conversion needed and a new one
+     * if a type conversion is required.
+     * @throws SyntaxError if there is a syntax error.
+     */
     private Node checkLHSAndExprTypes(IDNode lhsNode, ExpressionNode exprNode) throws SyntaxError {
         String lhsID = lhsNode.getId();
         TypeInfo lhsDataType = lhsNode.getDataType();
@@ -249,7 +258,7 @@ public class StatementParser {
     }
 
     /**
-     * Attempts to parse an assignment statement or an expression.
+     * Attempts to parse an assignment statement or an expression and does any type conversion if necessary.
      *
      * @param scope scope of the assignment or the expression.
      * @return an AST node that is the root of the assignment statement or an expression

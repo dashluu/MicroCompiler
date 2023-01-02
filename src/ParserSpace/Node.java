@@ -1,7 +1,5 @@
 package ParserSpace;
 
-import Utilities.Token;
-
 import java.util.ArrayList;
 
 public class Node {
@@ -34,7 +32,7 @@ public class Node {
 
     @Override
     public String toString() {
-        return nodeType.toString();
+        return "node of type '" + nodeType + "'";
     }
 
     @Override

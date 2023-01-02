@@ -24,7 +24,7 @@ public class DataTypeNode extends Node {
 
     @Override
     public String toString() {
-        return super.toString() + ", data type: " + dataType.toString();
+        return super.toString() + ", data of " + dataType;
     }
 
     @Override

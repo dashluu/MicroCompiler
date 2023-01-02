@@ -33,7 +33,7 @@ public class SymbolInfo {
 
     @Override
     public String toString() {
-        return "Symbol ID: " + id;
+        return "symbol '" + id + "'";
     }
 
     @Override

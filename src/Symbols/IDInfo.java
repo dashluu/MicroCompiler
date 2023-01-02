@@ -35,6 +35,11 @@ public class IDInfo extends SymbolInfo {
     }
 
     @Override
+    public String toString() {
+        return "ID '" + id + "' in scope " + scope;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!super.equals(obj) || !(obj instanceof IDInfo info)) {
             return false;

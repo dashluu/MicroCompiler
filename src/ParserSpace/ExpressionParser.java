@@ -257,7 +257,7 @@ public class ExpressionParser {
     }
 
     /**
-     * Determines if an operand is compatible with the given unary operator.
+     * Determines if an operand is compatible with the given unary operator and helps construct a subtree.
      *
      * @param operatorNode a node containing the operator.
      * @param operandNode  a node containing the operand.
@@ -265,17 +265,15 @@ public class ExpressionParser {
      */
     private void checkOperandTypeWithUnaryOperator(ExpressionNode operatorNode, ExpressionNode operandNode)
             throws SyntaxError {
-        String operatorID = operatorNode.getValue();
-        TokenType operatorType = operatorNode.getValueType();
         String operand = operandNode.getValue();
         TypeInfo operandDataType = operandNode.getDataType();
         String operandDataTypeId = operandDataType.getId();
         TypeTable typeTable = TypeTable.getInstance();
         // Type check the operand to determine if it is compatible with the operator
-        boolean typeCompatible = typeTable.IsTypeCompatibleUsingUnaryOperator(operatorType, operandDataType);
+        boolean typeCompatible = typeTable.IsTypeCompatibleUsingUnaryOperator(operatorNode.getValueType(), operandDataType);
         if (!typeCompatible) {
             throw new SyntaxError("'" + operand + "' of type '" + operandDataTypeId +
-                    "' is not compatible with the operator '" + operatorID + "'",
+                    "' is not compatible with the operator '" + operatorNode.getValue() + "'",
                     lexer.getCurrentLine());
         }
         operatorNode.addChild(operandNode);
@@ -283,7 +281,7 @@ public class ExpressionParser {
     }
 
     /**
-     * Determines if two operands are compatible with the given binary operator.
+     * Determines if two operands are compatible with the given binary operator and helps construct a subtree.
      *
      * @param operatorNode a node containing the operator.
      * @param operandNode1 the node containing the first operand.
@@ -293,8 +291,6 @@ public class ExpressionParser {
     private void checkOperandTypesWithBinaryOperators(ExpressionNode operatorNode,
                                                       ExpressionNode operandNode1,
                                                       ExpressionNode operandNode2) throws SyntaxError {
-        String operatorID = operatorNode.getValue();
-        TokenType operatorType = operatorNode.getValueType();
         String operand1 = operandNode1.getValue();
         String operand2 = operandNode2.getValue();
         TypeInfo operandDataType1 = operandNode1.getDataType();
@@ -306,12 +302,13 @@ public class ExpressionParser {
         TypeConversion typeConversion;
         TypeInfo resultType;
         // Type check the two operands
-        boolean typeCompatible = typeTable.AreTypesCompatibleUsingBinaryOperator(operatorType, operandDataType1, operandDataType2);
+        boolean typeCompatible = typeTable.AreTypesCompatibleUsingBinaryOperator(
+                operatorNode.getValueType(), operandDataType1, operandDataType2);
         if (!typeCompatible) {
             throw new SyntaxError(
                     "'" + operand1 + "' of type '" + operandDataTypeId1 +
                             "' and '" + operand2 + "' of type '" + operandDataTypeId2 +
-                            "' are not compatible using the operator '" + operatorID + "'",
+                            "' are not compatible using the operator '" + operatorNode.getValue() + "'",
                     lexer.getCurrentLine());
         }
         if (operandDataType1 != operandDataType2) {

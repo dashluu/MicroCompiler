@@ -17,7 +17,7 @@ public class SymbolTable {
     /**
      * Initializes the only instance of the symbol table if it has not been initialized and then returns it.
      *
-     * @return an SymbolTable object.
+     * @return a SymbolTable object.
      */
     public static SymbolTable getInstance() {
         if (!init) {

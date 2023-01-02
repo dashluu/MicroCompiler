@@ -9,6 +9,6 @@ public class TypeInfo extends SymbolInfo {
 
     @Override
     public String toString() {
-        return "Type ID: " + id;
+        return "type '" + id + "'";
     }
 }

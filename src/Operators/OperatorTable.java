@@ -91,7 +91,8 @@ public class OperatorTable {
      * @return true if the operator is unary and false otherwise.
      */
     public boolean isOperatorUnary(TokenType opID) {
-        return !isOperatorBinary(opID);
+        Operator op = opTable.get(opID);
+        return op.getType() == Operator.OperatorType.UNARY;
     }
 
     /**
