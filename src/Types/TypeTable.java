@@ -44,6 +44,18 @@ public class TypeTable {
             typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.SUB, intFloatConversion));
             typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.SUB, floatIntConversion));
             typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.SUB, floatFloatConversion));
+            typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.MULT, intIntConversion));
+            typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.MULT, intFloatConversion));
+            typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.MULT, floatIntConversion));
+            typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.MULT, floatFloatConversion));
+            typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.DIV, intIntConversion));
+            typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.DIV, intFloatConversion));
+            typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.DIV, floatIntConversion));
+            typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.DIV, floatFloatConversion));
+            typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.ASSIGNMENT, intIntConversion));
+            typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.ASSIGNMENT, intFloatConversion));
+            typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.ASSIGNMENT, floatIntConversion));
+            typeTable.setOperatorTypeConversion(new BinaryOperatorTypeConversion(TokenType.ASSIGNMENT, floatFloatConversion));
 
             init = true;
         }
