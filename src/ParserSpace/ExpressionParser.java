@@ -105,7 +105,7 @@ public class ExpressionParser {
 
         // Check if the expression starts with '(', a binary operator, an ID, or a number
         if (currTokenType != TokenType.LPAREN && !isOpBinary && currTokenType != TokenType.ID &&
-                currTokenType != TokenType.INT && currTokenType != TokenType.FLOAT) {
+                currTokenType != TokenType.INT_LITERAL && currTokenType != TokenType.FLOAT_LITERAL) {
             throw new SyntaxError("Invalid expression syntax at '" + currTokenStr + "'", lexer.getCurrentLine());
         }
 
@@ -120,11 +120,11 @@ public class ExpressionParser {
             // Get the ID's data type
             currTokenDataType = idInfo.getDataType();
             nodes.add(new ExpressionNode(currTokenStr, currTokenType, currTokenDataType));
-        } else if (currTokenType == TokenType.INT) {
+        } else if (currTokenType == TokenType.INT_LITERAL) {
             // Consume an integer
             currTokenDataType = (TypeInfo) symbolTable.getType(Global.INT_TYPE_ID);
             nodes.add(new ExpressionNode(currTokenStr, currTokenType, currTokenDataType));
-        } else if (currTokenType == TokenType.FLOAT) {
+        } else if (currTokenType == TokenType.FLOAT_LITERAL) {
             // Consume a floating point
             currTokenDataType = (TypeInfo) symbolTable.getType(Global.FLOAT_TYPE_ID);
             nodes.add(new ExpressionNode(currTokenStr, currTokenType, currTokenDataType));
@@ -212,7 +212,7 @@ public class ExpressionParser {
         for (ExpressionNode currNode : nodes) {
             currValueType = currNode.getValueType();
             // The token is an operand so push it directly to the postfix list
-            if (currValueType == TokenType.ID || currValueType == TokenType.INT || currValueType == TokenType.FLOAT) {
+            if (currValueType == TokenType.ID || currValueType == TokenType.INT_LITERAL || currValueType == TokenType.FLOAT_LITERAL) {
                 postfixNodes.add(currNode);
             } else if (currValueType == TokenType.LPAREN) {
                 opStack.add(currNode);
@@ -361,7 +361,7 @@ public class ExpressionParser {
 
         for (ExpressionNode currNode : postfixNodes) {
             currValueType = currNode.getValueType();
-            if (currValueType == TokenType.ID || currValueType == TokenType.INT || currValueType == TokenType.FLOAT) {
+            if (currValueType == TokenType.ID || currValueType == TokenType.INT_LITERAL || currValueType == TokenType.FLOAT_LITERAL) {
                 // Push the operand onto the temp stack
                 tempStack.add(currNode);
             } else if (OperatorTable.getInstance().isOperatorUnary(currValueType)) {

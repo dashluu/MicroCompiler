@@ -1,2 +1,3 @@
-    var b:int = +;
-    b=b;
+    var b:Int = +a;
+    const c:Float=b;
+    c = 5;

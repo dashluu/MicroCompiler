@@ -71,11 +71,12 @@ public class StatementParser {
         String currTokenStr = currToken.getValue();
         TokenType currTokenType = currToken.getType();
         // Check if the first token is an ID declaration keyword
-        if (currTokenType != TokenType.MUTABLE_ID_DECL) {
+        if (currTokenType != TokenType.MUTABLE_ID_DECL && currTokenType != TokenType.IMMUTABLE_ID_DECL) {
             lexer.putBack(currToken);
             return null;
         }
 
+        boolean isIDMutable = currTokenType == TokenType.MUTABLE_ID_DECL;
         currToken = lexer.getNextToken();
         // Check if there is an ID name
         if (currToken == null) {
@@ -123,7 +124,8 @@ public class StatementParser {
         TypeInfo idDataType = (TypeInfo) symbolTable.getType(currTokenStr);
         // Check if the token is a valid type
         if (idDataType == null) {
-            throw new SyntaxError("Invalid type for variable '" + id + "'", lexer.getCurrentLine());
+            throw new SyntaxError("Invalid type '" + currTokenStr + "' for variable '" + id + "'",
+                    lexer.getCurrentLine());
         }
 
         currToken = lexer.getNextToken();
@@ -138,10 +140,10 @@ public class StatementParser {
             throw new SyntaxError("Expected '=' but instead got '" + currTokenStr + "'", lexer.getCurrentLine());
         }
 
-        Node assignmentRoot = new Node(NodeType.ASSIGNMENT);
-        IDNode idDeclRoot = new IDNode(NodeType.MUTABLE_ID_DECL, id, true, idDataType);
-        assignmentRoot.addChild(idDeclRoot);
-        return assignmentRoot;
+        Node assignmentNode = new Node(NodeType.ASSIGNMENT);
+        IDNode idNode = new IDNode(NodeType.ID_DECL, id, idDataType, isIDMutable);
+        assignmentNode.addChild(idNode);
+        return assignmentNode;
     }
 
     /**
@@ -164,13 +166,15 @@ public class StatementParser {
 
         // Try parsing ID declaration
         // var ID: type = ...;
-        Node assignmentRoot = parseIDDeclaration(scope);
-        if (assignmentRoot != null) {
-            return assignmentRoot;
+        Node assignmentNode = parseIDDeclaration(scope);
+
+        if (assignmentNode != null) {
+            return assignmentNode;
         }
 
         // ID = ...;
         Token currToken = lexer.getNextToken();
+
         // Check if there is a token
         if (currToken == null) {
             return null;
@@ -180,14 +184,16 @@ public class StatementParser {
         String id = currTokenStr;
         SymbolTable symbolTable = SymbolTable.getInstance();
         tempTokenBuffer.addLast(currToken);
-        // Check if token is an existing ID
         IDInfo idInfo = (IDInfo) symbolTable.getID(id, scope);
+
+        // Check if token is an existing ID
         if (idInfo == null) {
             lexer.putBack(tempTokenBuffer);
             return null;
         }
 
         currToken = lexer.getNextToken();
+
         // Check if '=' is present
         if (currToken == null) {
             throw new SyntaxError("Missing ';' after '" + currTokenStr + "'", lexer.getCurrentLine());
@@ -195,17 +201,21 @@ public class StatementParser {
 
         TokenType currTokenType = currToken.getType();
         tempTokenBuffer.addLast(currToken);
-        // If the token is not '=', put back everything that has been read and return
+
         if (currTokenType != TokenType.ASSIGNMENT) {
+            // If the token is not '=', put back everything that has been read and return
             lexer.putBack(tempTokenBuffer);
             return null;
+        } else if (!idInfo.isMutable()) {
+            // If the ID is immutable but '=' is present, throw an exception
+            throw new SyntaxError("Unable to assign new value to the immutable variable '" + id + "'",
+                    lexer.getCurrentLine());
         }
 
-        assignmentRoot = new Node(NodeType.ASSIGNMENT);
-        TypeInfo idDataType = idInfo.getDataType();
-        IDNode idReassignmentRoot = new IDNode(NodeType.ID_REASSIGNMENT, id, false, idDataType);
-        assignmentRoot.addChild(idReassignmentRoot);
-        return assignmentRoot;
+        assignmentNode = new Node(NodeType.ASSIGNMENT);
+        IDNode idNode = new IDNode(NodeType.ID_ASSIGNMENT, id, idInfo.getDataType(), true);
+        assignmentNode.addChild(idNode);
+        return assignmentNode;
     }
 
     /**
@@ -268,11 +278,11 @@ public class StatementParser {
      */
     public Node parseStatement(Block scope) throws SyntaxError, IOException {
         // Assignment or pure expression
-        Node assignmentRoot = parseIDDeclaration(scope);
-        if (assignmentRoot == null) {
-            assignmentRoot = parseLHS(scope);
+        Node assignmentNode = parseIDDeclaration(scope);
+        if (assignmentNode == null) {
+            assignmentNode = parseLHS(scope);
         }
-        ExpressionNode exprRoot = (ExpressionNode) exprParser.parseExpression(scope);
+        ExpressionNode exprNode = (ExpressionNode) exprParser.parseExpression(scope);
 
         // Check if ';' is present
         Token currToken = lexer.getNextToken();
@@ -280,23 +290,24 @@ public class StatementParser {
             throw new SyntaxError("Missing ';' at the end of the statement", lexer.getCurrentLine());
         }
 
-        if (assignmentRoot == null) {
-            return exprRoot;
+        if (assignmentNode == null) {
+            return exprNode;
         }
 
         // Type check the data returned by the expression and the left-hand side
-        IDNode lhsNode = (IDNode) assignmentRoot.getChild(0);
-        Node rhsNode = checkLHSAndExprTypes(lhsNode, exprRoot);
+        IDNode lhsNode = (IDNode) assignmentNode.getChild(0);
+        Node rhsNode = checkLHSAndExprTypes(lhsNode, exprNode);
 
         String id = lhsNode.getId();
         TypeInfo idDataType = lhsNode.getDataType();
+        boolean isIDMutable = lhsNode.isMutable();
         // Add a new ID to the symbol table if the left-hand side is an ID declaration
-        if (lhsNode.getNodeType() == NodeType.MUTABLE_ID_DECL) {
-            SymbolTable.getInstance().set(new IDInfo(id, scope, idDataType, true));
+        if (lhsNode.getNodeType() == NodeType.ID_DECL) {
+            SymbolTable.getInstance().set(new IDInfo(id, scope, idDataType, isIDMutable));
         }
 
-        assignmentRoot.addChild(rhsNode);
-        return assignmentRoot;
+        assignmentNode.addChild(rhsNode);
+        return assignmentNode;
     }
 
 }

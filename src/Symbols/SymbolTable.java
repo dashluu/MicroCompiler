@@ -23,6 +23,7 @@ public class SymbolTable {
         if (!init) {
             // Initialize the symbol table
             symbolTable.set(new KeywordInfo(Global.MUTABLE_ID_DECL, TokenType.MUTABLE_ID_DECL));
+            symbolTable.set(new KeywordInfo(Global.IMMUTABLE_ID_DECL, TokenType.IMMUTABLE_ID_DECL));
             symbolTable.set(new TypeInfo(Global.INT_TYPE_ID, TokenType.INT_TYPE));
             symbolTable.set(new TypeInfo(Global.FLOAT_TYPE_ID, TokenType.FLOAT_TYPE));
             symbolTable.set(new OperatorInfo("+", TokenType.ADD));

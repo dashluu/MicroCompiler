@@ -4,20 +4,20 @@ import Symbols.TypeInfo;
 
 public class IDNode extends DataTypeNode {
     private final String id;
-    private final boolean isDecl;
+    private final boolean mutable;
 
-    public IDNode(NodeType nodeType, String id, boolean isDecl, TypeInfo dataType) {
+    public IDNode(NodeType nodeType, String id, TypeInfo dataType, boolean mutable) {
         super(nodeType, dataType);
         this.id = id;
-        this.isDecl = isDecl;
+        this.mutable = mutable;
     }
 
     public String getId() {
         return id;
     }
 
-    public boolean isDeclaration() {
-        return isDecl;
+    public boolean isMutable() {
+        return mutable;
     }
 
     @Override

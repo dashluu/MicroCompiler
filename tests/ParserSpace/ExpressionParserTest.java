@@ -74,29 +74,29 @@ class ExpressionParserTest {
         expectedInfixNodes.add(new ExpressionNode("*", TokenType.MULT));
         expectedInfixNodes.add(new ExpressionNode("b", TokenType.ID, intType));
         expectedInfixNodes.add(new ExpressionNode("+", TokenType.ADD));
-        expectedInfixNodes.add(new ExpressionNode("0.0e-0.0", TokenType.FLOAT, floatType));
+        expectedInfixNodes.add(new ExpressionNode("0.0e-0.0", TokenType.FLOAT_LITERAL, floatType));
         expectedInfixNodes.add(new ExpressionNode("/", TokenType.DIV));
-        expectedInfixNodes.add(new ExpressionNode("34.0", TokenType.FLOAT, floatType));
+        expectedInfixNodes.add(new ExpressionNode("34.0", TokenType.FLOAT_LITERAL, floatType));
         expectedInfixNodes.add(new ExpressionNode("*", TokenType.MULT));
         expectedInfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
-        expectedInfixNodes.add(new ExpressionNode("41", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode("41", TokenType.INT_LITERAL, intType));
         expectedInfixNodes.add(new ExpressionNode("-", TokenType.SUB));
         expectedInfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
         expectedInfixNodes.add(new ExpressionNode("+", TokenType.PLUS));
-        expectedInfixNodes.add(new ExpressionNode("35", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode("35", TokenType.INT_LITERAL, intType));
         expectedInfixNodes.add(new ExpressionNode("/", TokenType.DIV));
         expectedInfixNodes.add(new ExpressionNode("c", TokenType.ID, floatType));
         expectedInfixNodes.add(new ExpressionNode("+", TokenType.ADD));
         expectedInfixNodes.add(new ExpressionNode("(", TokenType.LPAREN));
         expectedInfixNodes.add(new ExpressionNode("(", TokenType.LPAREN));
-        expectedInfixNodes.add(new ExpressionNode("777", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode("777", TokenType.INT_LITERAL, intType));
         expectedInfixNodes.add(new ExpressionNode("-", TokenType.SUB));
-        expectedInfixNodes.add(new ExpressionNode("4", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode("4", TokenType.INT_LITERAL, intType));
         expectedInfixNodes.add(new ExpressionNode(")", TokenType.RPAREN));
         expectedInfixNodes.add(new ExpressionNode("+", TokenType.ADD));
-        expectedInfixNodes.add(new ExpressionNode("12", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode("12", TokenType.INT_LITERAL, intType));
         expectedInfixNodes.add(new ExpressionNode("*", TokenType.MULT));
-        expectedInfixNodes.add(new ExpressionNode("95", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode("95", TokenType.INT_LITERAL, intType));
         expectedInfixNodes.add(new ExpressionNode(")", TokenType.RPAREN));
 
         // Set up the symbol table
@@ -122,12 +122,12 @@ class ExpressionParserTest {
         expectedInfixNodes.add(new ExpressionNode("*", TokenType.MULT));
         expectedInfixNodes.add(new ExpressionNode("(", TokenType.LPAREN));
         expectedInfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
-        expectedInfixNodes.add(new ExpressionNode("2.0e-1", TokenType.FLOAT, floatType));
+        expectedInfixNodes.add(new ExpressionNode("2.0e-1", TokenType.FLOAT_LITERAL, floatType));
         expectedInfixNodes.add(new ExpressionNode("+", TokenType.ADD));
         expectedInfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
         expectedInfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
         expectedInfixNodes.add(new ExpressionNode("(", TokenType.LPAREN));
-        expectedInfixNodes.add(new ExpressionNode("75", TokenType.INT, intType));
+        expectedInfixNodes.add(new ExpressionNode("75", TokenType.INT_LITERAL, intType));
         expectedInfixNodes.add(new ExpressionNode(")", TokenType.RPAREN));
         expectedInfixNodes.add(new ExpressionNode(")", TokenType.RPAREN));
 
@@ -148,9 +148,9 @@ class ExpressionParserTest {
         ArrayList<ExpressionNode> expectedPostfixNodes = new ArrayList<>();
         expectedPostfixNodes.add(new ExpressionNode("a", TokenType.ID, intType));
         expectedPostfixNodes.add(new ExpressionNode("a", TokenType.ID, intType));
-        expectedPostfixNodes.add(new ExpressionNode("2.0e-1", TokenType.FLOAT, floatType));
+        expectedPostfixNodes.add(new ExpressionNode("2.0e-1", TokenType.FLOAT_LITERAL, floatType));
         expectedPostfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
-        expectedPostfixNodes.add(new ExpressionNode("75", TokenType.INT, intType));
+        expectedPostfixNodes.add(new ExpressionNode("75", TokenType.INT_LITERAL, intType));
         expectedPostfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
         expectedPostfixNodes.add(new ExpressionNode("-", TokenType.MINUS));
         expectedPostfixNodes.add(new ExpressionNode("+", TokenType.ADD));

@@ -2,8 +2,9 @@ package Utilities;
 
 public class Global {
     public static String MUTABLE_ID_DECL = "var";
-    public static String INT_TYPE_ID = "int";
-    public static String FLOAT_TYPE_ID = "float";
+    public static String IMMUTABLE_ID_DECL = "const";
+    public static String INT_TYPE_ID = "Int";
+    public static String FLOAT_TYPE_ID = "Float";
 
     public static String GLOBAL_SCOPE_ID = "global";
 
