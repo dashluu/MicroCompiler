@@ -284,7 +284,7 @@ public class Lexer {
             return null;
         }
 
-        return new Token(tokenStr.toString(), TokenType.INT, currLine);
+        return new Token(tokenStr.toString(), TokenType.INT_LITERAL, currLine);
     }
 
     /**
@@ -331,7 +331,7 @@ public class Lexer {
             }
         }
 
-        TokenType tokenType = missingDecPoint ? TokenType.INT : TokenType.FLOAT;
+        TokenType tokenType = missingDecPoint ? TokenType.INT_LITERAL : TokenType.FLOAT_LITERAL;
         return new Token(tokenStr.toString(), tokenType, currLine);
     }
 
@@ -393,6 +393,6 @@ public class Lexer {
             throw new SyntaxError("Invalid numeric expression after '" + tokenStr + "'", getCurrentLine());
         }
         tokenStr.append(tempToken.getValue());
-        return new Token(tokenStr.toString(), TokenType.FLOAT, currLine);
+        return new Token(tokenStr.toString(), TokenType.FLOAT_LITERAL, currLine);
     }
 }

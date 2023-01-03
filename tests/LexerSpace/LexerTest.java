@@ -28,24 +28,24 @@ class LexerTest {
     public void testLexerValid1() {
         String inputStr = "52+-(-25.)-(32.4-+.e.)/.9*.";
         ArrayList<Token> expectedTokens = new ArrayList<>();
-        expectedTokens.add(new Token("52", TokenType.INT));
+        expectedTokens.add(new Token("52", TokenType.INT_LITERAL));
         expectedTokens.add(new Token("+", TokenType.ADD));
         expectedTokens.add(new Token("-", TokenType.SUB));
         expectedTokens.add(new Token("(", TokenType.LPAREN));
         expectedTokens.add(new Token("-", TokenType.SUB));
-        expectedTokens.add(new Token("25.0", TokenType.FLOAT));
+        expectedTokens.add(new Token("25.0", TokenType.FLOAT_LITERAL));
         expectedTokens.add(new Token(")", TokenType.RPAREN));
         expectedTokens.add(new Token("-", TokenType.SUB));
         expectedTokens.add(new Token("(", TokenType.LPAREN));
-        expectedTokens.add(new Token("32.4", TokenType.FLOAT));
+        expectedTokens.add(new Token("32.4", TokenType.FLOAT_LITERAL));
         expectedTokens.add(new Token("-", TokenType.SUB));
         expectedTokens.add(new Token("+", TokenType.ADD));
-        expectedTokens.add(new Token("0.0e0.0", TokenType.FLOAT));
+        expectedTokens.add(new Token("0.0e0.0", TokenType.FLOAT_LITERAL));
         expectedTokens.add(new Token(")", TokenType.RPAREN));
         expectedTokens.add(new Token("/", TokenType.DIV));
-        expectedTokens.add(new Token("0.9", TokenType.FLOAT));
+        expectedTokens.add(new Token("0.9", TokenType.FLOAT_LITERAL));
         expectedTokens.add(new Token("*", TokenType.MULT));
-        expectedTokens.add(new Token("0.0", TokenType.FLOAT));
+        expectedTokens.add(new Token("0.0", TokenType.FLOAT_LITERAL));
 
         try {
             ArrayList<Token> actualTokens = testLexerHelper(inputStr);
@@ -65,7 +65,7 @@ class LexerTest {
         expectedTokens.add(new Token("b", TokenType.ID));
         expectedTokens.add(new Token("+", TokenType.ADD));
         expectedTokens.add(new Token("-", TokenType.SUB));
-        expectedTokens.add(new Token("0.0e+0.5", TokenType.FLOAT));
+        expectedTokens.add(new Token("0.0e+0.5", TokenType.FLOAT_LITERAL));
         expectedTokens.add(new Token("*", TokenType.MULT));
         expectedTokens.add(new Token("a", TokenType.ID));
         expectedTokens.add(new Token("/", TokenType.DIV));
@@ -73,13 +73,13 @@ class LexerTest {
         expectedTokens.add(new Token("*", TokenType.MULT));
         expectedTokens.add(new Token("(", TokenType.LPAREN));
         expectedTokens.add(new Token("(", TokenType.LPAREN));
-        expectedTokens.add(new Token("2.0e-1", TokenType.FLOAT));
+        expectedTokens.add(new Token("2.0e-1", TokenType.FLOAT_LITERAL));
         expectedTokens.add(new Token("-", TokenType.SUB));
-        expectedTokens.add(new Token("67.0", TokenType.FLOAT));
+        expectedTokens.add(new Token("67.0", TokenType.FLOAT_LITERAL));
         expectedTokens.add(new Token("+", TokenType.ADD));
-        expectedTokens.add(new Token("71e3", TokenType.FLOAT));
+        expectedTokens.add(new Token("71e3", TokenType.FLOAT_LITERAL));
         expectedTokens.add(new Token("*", TokenType.MULT));
-        expectedTokens.add(new Token("21", TokenType.INT));
+        expectedTokens.add(new Token("21", TokenType.INT_LITERAL));
         expectedTokens.add(new Token(")", TokenType.RPAREN));
         expectedTokens.add(new Token(")", TokenType.RPAREN));
         expectedTokens.add(new Token(")", TokenType.RPAREN));
